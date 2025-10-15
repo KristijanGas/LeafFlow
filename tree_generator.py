@@ -58,5 +58,6 @@ tg = TreeGeneratorBranching(11)
 edges = tg.generateTree(4,300)
 centrFinder = findCentroid()
 centrFinder.find(edges)
+
 #for edge in edges:
 #    print(edge[0][0],edge[0][1])
