@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-
+from centroidfind import findCentroid
 class TreeNode:
     def __init__(self, value):
         self.value = value
@@ -50,9 +50,13 @@ class TreeGeneratorBranching:
                 dothe = self.randint(1, 1000)
                 if dothe < fillrate:
                     Out[i] = (Out[i][0], '(' if dothe % 2 == 0 else ')')
-        #print(Out)
+        print(Out[0][0][0])
         return Out
 
 
-tg = TreeGeneratorBranching(19)
-tg.generateTree(6,300)
+tg = TreeGeneratorBranching(11)
+edges = tg.generateTree(4,300)
+centrFinder = findCentroid()
+centrFinder.find(edges)
+#for edge in edges:
+#    print(edge[0][0],edge[0][1])
