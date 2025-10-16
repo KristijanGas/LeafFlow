@@ -12,6 +12,7 @@ class TreeVisualizerApp:
         self.root.title("LeafFlow")
         self.root.geometry(f"{WIDTH}x{HEIGHT}")
         self.main_menu()
+        self.ConnectsTo = []
 
     def main_menu(self):
         self.clear_window()
@@ -35,11 +36,20 @@ class TreeVisualizerApp:
         self.tree_size = num
         tg = TreeGeneratorBranching(self.tree_size)
         edges = tg.generateTree(4,300)
-        print(edges)
+
+        for i in range(self.tree_size+1):
+            self.ConnectsTo.append([])
+        for i in range(self.tree_size-1):
+            u = edges[i][0][0]
+            v = edges[i][0][1]
+            self.ConnectsTo[u].append(v)
+            self.ConnectsTo[v].append(u)
+
         centrFinder = findCentroid()
-        centroid = centrFinder.find(edges)
+        centroid = centrFinder.find(self.ConnectsTo)
         print("centroid: ",centroid)
         self.tree_root = centroid
+
         self.show_tree()
 
     def show_tree(self):
