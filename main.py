@@ -1,6 +1,7 @@
 import tkinter as tk
 import math
 from tree_generator import TreeGeneratorBranching, TreeNode
+from centroidfind import findCentroid
 
 WIDTH, HEIGHT = 1280, 720
 CENTER_X, CENTER_Y = WIDTH // 2, HEIGHT // 2
@@ -31,9 +32,14 @@ class TreeVisualizerApp:
         except ValueError:
             tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
             return
-
-        self.generator = TreeGeneratorBranching(num)
-        self.tree_root = self.generator.generateTree(4,100)  # Example parameters
+        self.tree_size = num
+        tg = TreeGeneratorBranching(self.tree_size)
+        edges = tg.generateTree(4,300)
+        print(edges)
+        centrFinder = findCentroid()
+        centroid = centrFinder.find(edges)
+        print("centroid: ",centroid)
+        self.tree_root = centroid
         self.show_tree()
 
     def show_tree(self):

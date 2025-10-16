@@ -50,14 +50,15 @@ class TreeGeneratorBranching:
                 dothe = self.randint(1, 1000)
                 if dothe < fillrate:
                     Out[i] = (Out[i][0], '(' if dothe % 2 == 0 else ')')
-        print(Out[0][0][0])
+        #print(Out[0][0][0])
         return Out
 
-
-tg = TreeGeneratorBranching(11)
-edges = tg.generateTree(4,300)
-centrFinder = findCentroid()
-centrFinder.find(edges)
+#[
+#tg = TreeGeneratorBranching(11)
+#edges = tg.generateTree(4,300)
+#centrFinder = findCentroid()
+#centroid = centrFinder.find(edges)
+#print(centroid)
 
 #for edge in edges:
 #    print(edge[0][0],edge[0][1])

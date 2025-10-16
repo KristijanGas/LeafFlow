@@ -18,7 +18,7 @@ class findCentroid:
         maxSubtree = max(maxSubtree,self.n - cnt - 1)
         if maxSubtree < self.n/2:
             self.centroid = start
-            print("Centroid is: ",start)
+            #print("Centroid is: ",start)
         return cnt+1
 
     def find(self,edges): # edge ((u,v),type)
