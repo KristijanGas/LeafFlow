@@ -13,6 +13,7 @@ class TreeVisualizerApp:
         self.root.geometry(f"{WIDTH}x{HEIGHT}")
         self.main_menu()
         self.ConnectsTo = []
+        self.ConnectsToEdges = []
 
     def main_menu(self):
         self.clear_window()
@@ -39,12 +40,24 @@ class TreeVisualizerApp:
 
         for i in range(self.tree_size+1):
             self.ConnectsTo.append([])
+            self.ConnectsToEdges.append([])
         for i in range(self.tree_size-1):
             u = edges[i][0][0]
             v = edges[i][0][1]
             self.ConnectsTo[u].append(v)
             self.ConnectsTo[v].append(u)
-
+            type = edges[i][1]
+            
+            if type == "?":
+                self.ConnectsToEdges[u].append([v,0])
+                self.ConnectsToEdges[v].append([u,0])
+            elif type == ")":
+                self.ConnectsToEdges[u].append([v,1])
+                self.ConnectsToEdges[v].append([u,-1])
+            else:
+                self.ConnectsToEdges[u].append([v,-1])
+                self.ConnectsToEdges[v].append([u,1])
+            
         centrFinder = findCentroid()
         centroid = centrFinder.find(self.ConnectsTo)
         print("centroid: ",centroid)

@@ -14,7 +14,7 @@ class TreeGeneratorBranching:
         self.n = n
         self.nodes = [TreeNode(i) for i in range(1, n + 1)]
         self.adj_list = defaultdict(list)
-    def randint(self, a, b):
+    def __randint(self, a, b):
         if(a==b):
             return a
         return random.randint(a, b)
@@ -29,9 +29,9 @@ class TreeGeneratorBranching:
 
         while have != n:
             remain = n - have
-            len_branch = self.randint(1, min(remain, maxbranchlen) // 2) * 2
+            len_branch = self.__randint(1, min(remain, maxbranchlen) // 2) * 2
             size = len(Red)
-            u = Red[self.randint(0, size - 1)]
+            u = Red[self.__randint(0, size - 1)]
             for i in range(len_branch):
                 Out.append(((u, have + 1), '?'))
                 Mentions[u] = Mentions.get(u, 0) + 1
@@ -47,7 +47,7 @@ class TreeGeneratorBranching:
         for i in range(n - 1):
             u, v = Out[i][0]
             if Mentions.get(u, 0) > 1 and Mentions.get(v, 0) > 1:
-                dothe = self.randint(1, 1000)
+                dothe = self.__randint(1, 1000)
                 if dothe < fillrate:
                     Out[i] = (Out[i][0], '(' if dothe % 2 == 0 else ')')
         #print(Out[0][0][0])
