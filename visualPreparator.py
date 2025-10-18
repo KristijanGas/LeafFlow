@@ -48,6 +48,7 @@ class visualPreparator:
 
             # consider collision only if projection is in front of origin (t >= 0)
             # and the distance to the line is less than or equal to radius
+            disToHit = self.pointsDistance(cx,cy,originx,originy)
             if t >= 0 and distSq <= (r * r)-0.1:
                 if t < closestHitDist:
                     closestHitDist = t
@@ -58,8 +59,6 @@ class visualPreparator:
         return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         
     def angleFromOrigin(self,x1,y1):
-        if y1 < 0:
-            return 2*math.pi + math.atan2(y1,x1)
         return math.atan2(y1,x1)
 
     def angleToVector(self, angle):
@@ -67,7 +66,7 @@ class visualPreparator:
         y = math.sin(angle)
         return (x, y)
     def radiusRestriction(self,spacingMultiplier,vertexRadius):
-        return vertexRadius+spacingMultiplier*vertexRadius/3
+        return vertexRadius+spacingMultiplier*vertexRadius/2.5
     
     def initPositions(self,spacingMultiplier,vertexRadius):
         radiusRestriction = []
@@ -91,7 +90,7 @@ class visualPreparator:
                 maxAngle = centerAngle+math.pi
                 self.vertexPositioning[curNode] = {"x" : 0, "y" : 0, "node" : curNode}
                 radiusRestriction.append({"node": curNode,"x" : 0, "y" : 0 ,"r" : self.radiusRestriction(spacingMultiplier,vertexRadius)})
-                print("node:",curNode,"x:",0,"y:",0)
+                #print("node:",curNode,"x:",0,"y:",0)
                 totalRange = maxAngle-minAngle
                 singleAngleAdd = totalRange/childrenCount
 
@@ -102,7 +101,7 @@ class visualPreparator:
                     newy*=vertexRadius*spacingMultiplier
                     radiusRestriction.append({"node": adjecent,"x" : newx, "y" : newy ,"r" : self.radiusRestriction(spacingMultiplier,vertexRadius)})
                     self.vertexPositioning[adjecent] = {"x" : newx, "y" : newy, "node" : adjecent}
-                    print("node:",adjecent,"x:",newx,"y:",newy)
+                    #print("node:",adjecent,"x:",newx,"y:",newy)
             else:
                 
                 if childrenCount == 0:
@@ -110,8 +109,8 @@ class visualPreparator:
                 curx = self.vertexPositioning[curNode]["x"]
                 cury = self.vertexPositioning[curNode]["y"]
                 centerAngle = self.angleFromOrigin(curx,cury)
-                minAngle = centerAngle-math.pi/2
-                maxAngle = centerAngle+math.pi/2
+                minAngle = centerAngle-math.pi
+                maxAngle = centerAngle+math.pi
                 dAlpha = centerAngle
                 while dAlpha <= maxAngle:
                     collided = self.checkCollision(curNode,curx,cury,dAlpha,radiusRestriction)
@@ -128,26 +127,34 @@ class visualPreparator:
                     dAlpha -= 0.01
                 totalRange = maxAngle-minAngle
                 singleAngleAdd = totalRange/childrenCount
-                for i in range(childrenCount):
+                i = 0
+                nodesDrawn = 0
+                while i < childrenCount:
                     adjecent = self.ConnectsTo[curNode][i]
                     if adjecent == parent:
-                        continue
-                    newx, newy = self.angleToVector(singleAngleAdd*i+minAngle)
+                        i+=1
+                    if i >= childrenCount:
+                        break
+                    adjecent = self.ConnectsTo[curNode][i]
+                    newx, newy = self.angleToVector(singleAngleAdd*(nodesDrawn+1)+minAngle)
                     newx*=vertexRadius*spacingMultiplier
                     newy*=vertexRadius*spacingMultiplier
                     newx+=curx
                     newy+=cury
                     radiusRestriction.append({"node": adjecent,"x" : newx, "y" : newy ,"r" : self.radiusRestriction(spacingMultiplier,vertexRadius)})
                     self.vertexPositioning[adjecent] = {"x" : newx, "y" : newy, "node" : adjecent}
-                    print("node:",adjecent,"x:",newx,"y:",newy)
+                    #print("node:",adjecent,"x:",newx,"y:",newy)
+                    i+=1
+                    nodesDrawn+=1
         return self.vertexPositioning
 
 #example usage:
 #
-n = 5
+"""
+n = 7
 tg = TreeGeneratorBranching(n)
 edges = tg.generateTree(2,300)
-
+edges = [((1, 2), '?'),((1, 3), '?'),((1, 4), '?'),((1, 5), '?'),((5, 6), '?'),((6, 7), '?')]
 print(edges)
 centrFinder = findCentroid()
 ConnectsTo = []
@@ -161,3 +168,4 @@ for i in range(n-1):
 centroid = centrFinder.find(ConnectsTo)
 vp = visualPreparator(n, centroid, ConnectsTo)
 positions = vp.initPositions(spacingMultiplier=2, vertexRadius=20)
+"""

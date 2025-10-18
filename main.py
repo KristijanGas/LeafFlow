@@ -51,7 +51,10 @@ class TreeVisualizerApp:
         self.tree_size = num
         tg = TreeGeneratorBranching(self.tree_size)
         edges = tg.generateTree(2,300)
+        #edges = [((1, 2), '?'), ((2, 3), ')'), ((3, 4), '?'), ((4, 5), '('), ((1, 6), '?'), ((6, 7), '?'), ((1, 8), ')'), ((8, 9), '?'), ((5, 10), '('), ((10, 11), '?'), ((5, 12), '?'), ((12, 13), '?'), ((13, 14), '?'), ((14, 15), '?'), ((9, 16), ')'), ((16, 17), '?'), ((11, 18), '?'), ((18, 19), '?'), ((5, 20), '?'), ((20, 21), '?'), ((21, 22), '?'), ((22, 23), '('), ((13, 24), '?'), ((24, 25), '?'), ((13, 26), '?'), ((26, 27), '?'), ((19, 28), '?'), ((28, 29), '?'), ((5, 30), ')'), ((30, 31), '?'), ((3, 32), ')'), ((32, 33), '?'), ((23, 34), '('), ((34, 35), ')'), ((19, 36), '?'), ((36, 37), '?'), ((25, 38), ')'), ((38, 39), '('), ((39, 40), ')'), ((40, 41), ')'), ((41, 42), '?'), ((42, 43), '?'), ((15, 44), '?'), ((44, 45), '?'), ((41, 46), '?'), ((46, 47), '?'), ((39, 48), '?'), ((48, 49), '?'), ((7, 50), ')'), ((50, 51), '?'), ((35, 52), '('), ((52, 53), '?'), ((5, 54), '?'), ((54, 55), '?')]
 
+
+        print(edges)
         for i in range(self.tree_size+1):
             self.ConnectsTo.append([])
             self.ConnectsToEdges.append([])
@@ -77,7 +80,7 @@ class TreeVisualizerApp:
         print("centroid: ",centroid)
         self.tree_root = centroid
         vp = visualPreparator(self.tree_size, centroid, self.ConnectsTo)
-        positions = vp.initPositions(spacingMultiplier=3, vertexRadius=20)
+        positions = vp.initPositions(spacingMultiplier=2, vertexRadius=10)
         self.clear_window()
         self.show_tree(positions,10)
         self.add_main_menu_button()
