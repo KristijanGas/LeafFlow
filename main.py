@@ -50,7 +50,7 @@ class TreeVisualizerApp:
             return
         self.tree_size = num
         tg = TreeGeneratorBranching(self.tree_size)
-        edges = tg.generateTree(4,300)
+        edges = tg.generateTree(2,300)
 
         for i in range(self.tree_size+1):
             self.ConnectsTo.append([])
@@ -77,10 +77,9 @@ class TreeVisualizerApp:
         print("centroid: ",centroid)
         self.tree_root = centroid
         vp = visualPreparator(self.tree_size, centroid, self.ConnectsTo)
-        positions = vp.initPositions(spacingMultiplier=4, vertexRadius=20)
-        print(positions)
+        positions = vp.initPositions(spacingMultiplier=3, vertexRadius=20)
         self.clear_window()
-        self.show_tree(positions,30)
+        self.show_tree(positions,10)
         self.add_main_menu_button()
 
     def show_tree(self, positions, nodeRadius):

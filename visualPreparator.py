@@ -32,50 +32,30 @@ class visualPreparator:
             cx = circle["x"]
             cy = circle["y"]
             r = circle["r"]
-
             # Vector from origin to circle center
-            fx = originx - cx
-            fy = originy - cy
+            fx = cx - originx
+            fy = cy - originy
 
-            # Quadratic formula coefficients (based on ray-circle intersection)
-            a = dx*dx + dy*dy
-            b = 2 * (fx*dx + fy*dy)
-            c = fx*fx + fy*fy - r*r
+            # projection length of center onto the ray direction (may be negative)
+            t = fx * dx + fy * dy
 
-            discriminant = b*b - 4*a*c
+            # closest point on infinite line (ray) to circle center
+            closestX = originx + t * dx
+            closestY = originy + t * dy
 
-            if discriminant < 0.2:
-                # No intersection
-                continue
+            # squared distance from circle center to that closest point
+            distSq = (closestX - cx) ** 2 + (closestY - cy) ** 2
 
-            sqrt_d = math.sqrt(discriminant)
-
-            # Two possible intersection distances along ray
-            t1 = (-b - sqrt_d) / (2*a)
-            t2 = (-b + sqrt_d) / (2*a)
-
-            # Only consider points in front of the origin (t >= 0)
-            valid_t = []
-            if t1 >= 0:
-                valid_t.append(t1)
-            if t2 >= 0:
-                valid_t.append(t2)
-
-            if not valid_t:
-                continue
-
-            t_hit = min(valid_t)
-            if t_hit < closestHitDist:
-                closestHitDist = t_hit
-                closestHitIndex = i
-
+            # consider collision only if projection is in front of origin (t >= 0)
+            # and the distance to the line is less than or equal to radius
+            if t >= 0 and distSq <= (r * r)-0.1:
+                if t < closestHitDist:
+                    closestHitDist = t
+                    closestHitIndex = i
         return closestHitIndex
 
-
-    def gradientFromOrigin(self,x1,y1,x2,y2):
-        dist1 = math.sqrt(x1**2+y1**2)
-        dist2 = math.sqrt(x2**2+y2**2)
-        return (dist2-dist1)/math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+    def pointsDistance(self, x1, y1, x2, y2):
+        return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         
     def angleFromOrigin(self,x1,y1):
         if y1 < 0:
@@ -86,7 +66,9 @@ class visualPreparator:
         x = math.cos(angle)
         y = math.sin(angle)
         return (x, y)
-
+    def radiusRestriction(self,spacingMultiplier,vertexRadius):
+        return vertexRadius+spacingMultiplier*vertexRadius/3
+    
     def initPositions(self,spacingMultiplier,vertexRadius):
         radiusRestriction = []
 
@@ -108,7 +90,7 @@ class visualPreparator:
                 minAngle = centerAngle-math.pi
                 maxAngle = centerAngle+math.pi
                 self.vertexPositioning[curNode] = {"x" : 0, "y" : 0, "node" : curNode}
-                radiusRestriction.append({"node": curNode,"x" : 0, "y" : 0 ,"r" : vertexRadius+spacingMultiplier*vertexRadius/2})
+                radiusRestriction.append({"node": curNode,"x" : 0, "y" : 0 ,"r" : self.radiusRestriction(spacingMultiplier,vertexRadius)})
                 print("node:",curNode,"x:",0,"y:",0)
                 totalRange = maxAngle-minAngle
                 singleAngleAdd = totalRange/childrenCount
@@ -118,7 +100,7 @@ class visualPreparator:
                     newx, newy = self.angleToVector(singleAngleAdd/2 + singleAngleAdd*i+minAngle)
                     newx*=vertexRadius*spacingMultiplier
                     newy*=vertexRadius*spacingMultiplier
-                    radiusRestriction.append({"node": adjecent,"x" : newx, "y" : newy ,"r" : vertexRadius+spacingMultiplier*vertexRadius/4})
+                    radiusRestriction.append({"node": adjecent,"x" : newx, "y" : newy ,"r" : self.radiusRestriction(spacingMultiplier,vertexRadius)})
                     self.vertexPositioning[adjecent] = {"x" : newx, "y" : newy, "node" : adjecent}
                     print("node:",adjecent,"x:",newx,"y:",newy)
             else:
@@ -130,30 +112,32 @@ class visualPreparator:
                 centerAngle = self.angleFromOrigin(curx,cury)
                 minAngle = centerAngle-math.pi/2
                 maxAngle = centerAngle+math.pi/2
-                noCollisionBefore = -1
-                dAlpha = minAngle
+                dAlpha = centerAngle
                 while dAlpha <= maxAngle:
                     collided = self.checkCollision(curNode,curx,cury,dAlpha,radiusRestriction)
-                    if noCollisionBefore == 1 and collided != -1:
+                    if collided != -1:
                         maxAngle = dAlpha
                         break
-                    if collided == -1:
-                        noCollisionBefore = 1
+                    dAlpha += 0.01
+                dAlpha = centerAngle
+                while dAlpha >= minAngle:
+                    collided = self.checkCollision(curNode,curx,cury,dAlpha,radiusRestriction)
                     if collided != -1:
                         minAngle = dAlpha
-                    dAlpha += 0.01
+                        break
+                    dAlpha -= 0.01
                 totalRange = maxAngle-minAngle
                 singleAngleAdd = totalRange/childrenCount
                 for i in range(childrenCount):
                     adjecent = self.ConnectsTo[curNode][i]
                     if adjecent == parent:
                         continue
-                    newx, newy = self.angleToVector(singleAngleAdd/2 + singleAngleAdd*i+minAngle)
+                    newx, newy = self.angleToVector(singleAngleAdd*i+minAngle)
                     newx*=vertexRadius*spacingMultiplier
                     newy*=vertexRadius*spacingMultiplier
                     newx+=curx
                     newy+=cury
-                    radiusRestriction.append({"node": adjecent,"x" : newx, "y" : newy ,"r" : vertexRadius+spacingMultiplier*vertexRadius/2})
+                    radiusRestriction.append({"node": adjecent,"x" : newx, "y" : newy ,"r" : self.radiusRestriction(spacingMultiplier,vertexRadius)})
                     self.vertexPositioning[adjecent] = {"x" : newx, "y" : newy, "node" : adjecent}
                     print("node:",adjecent,"x:",newx,"y:",newy)
         return self.vertexPositioning
