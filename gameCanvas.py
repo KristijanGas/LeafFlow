@@ -2,7 +2,7 @@ import tkinter as tk
 import math
 
 class gameCanvas(tk.Frame):
-    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign,check_result, **kwargs):
+    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign,check_result,next_level, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.main_menu_callback = main_menu_callback
@@ -24,7 +24,7 @@ class gameCanvas(tk.Frame):
         self.start_node = None
 
         self.edge_callback = player_edge_assign
-        self.empty_click_callback = None
+        self.next_level = next_level
         self.check_result_callback = check_result
         self.reset_edges_callback = reset_edges_callback
 
@@ -50,7 +50,7 @@ class gameCanvas(tk.Frame):
         self.canvas.bind("<ButtonRelease-3>", self._on_pan_end)
 
         self.canvas.bind("<Configure>", self._on_resize)
-        self.canvas.bind("<Button-1>", self._on_canvas_click)
+        #self.canvas.bind("<Button-1>", self._on_canvas_click)
         self.canvas.bind("<ButtonRelease-1>", self._on_canvas_release)
         self.canvas.bind("<MouseWheel>", self._on_mouse_wheel)  # Windows/macOS
         self.canvas.bind("<Button-4>", self._on_mouse_wheel)    # Linux scroll up
@@ -91,7 +91,7 @@ class gameCanvas(tk.Frame):
                 command=lambda: [popup.destroy(), self.reset_edges_callback() if self.reset_edges_callback else None]).grid(row=0, column=1, padx=5)
 
         tk.Button(button_frame, text="Next Level", width=12,
-                command=lambda: [popup.destroy(), self.next_level_callback() if self.next_level_callback else None]).grid(row=0, column=2, padx=5)
+                command=lambda: [popup.destroy(), self.next_level() if self.next_level else None]).grid(row=0, column=2, padx=5)
 
     def solved_incorrectly(self, node_list):
         """Show a failure message and color specified nodes red."""
@@ -268,10 +268,6 @@ class gameCanvas(tk.Frame):
         self.canvas.create_line(x, y, x1, y1, fill=color, width=2)
         self.canvas.create_line(x, y, x2, y2, fill=color, width=2)
 
-    def _on_canvas_click(self, event):
-        clicked_items = self.canvas.find_withtag("current")
-        if not clicked_items and self.empty_click_callback:
-            self.empty_click_callback()
 
     def _on_canvas_release(self, event):
         if not self.start_node:

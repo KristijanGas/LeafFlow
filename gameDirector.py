@@ -9,13 +9,14 @@ import tkinter as tk
 
 class gameDirector:
 
-    def __init__(self,tree_size,ConnectsToEdges,ConnectsTo,root,main_menu):
+    def __init__(self,tree_size,ConnectsToEdges,ConnectsTo,root,main_menu,next_level):
         self.tree_size = tree_size
         self.ConnectsToEdges = ConnectsToEdges
         self.ConnectsTo = ConnectsTo
         self.vertexPositioning = {}
         self.root = root
         self.main_menu = main_menu
+        self.next_level_callback = next_level
         self.node_radius = 8
 
     def clear_window(self):
@@ -70,7 +71,8 @@ class gameDirector:
         self.square_canvas = gameCanvas(self.root,main_menu_callback=self.main_menu,
                                    reset_edges_callback=self.restartGame,
                                    player_edge_assign=self.player_edge_assign,
-                                   check_result=self.check_result
+                                   check_result=self.check_result,
+                                   next_level=self.next_level
                                    )
         self.square_canvas.pack(fill=tk.BOTH, expand=True)
         
@@ -151,3 +153,5 @@ class gameDirector:
         if isInCorrect:
             self.incorrect_sequence.append(start)
         return isInCorrect
+    def next_level(self):
+        self.next_level_callback()

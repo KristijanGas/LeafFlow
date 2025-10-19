@@ -28,7 +28,7 @@ class TreeVisualizerApp:
         self.number_entry = tk.Entry(self.root, font=("Arial", 14))
         self.number_entry.pack(pady=10)
 
-        play_btn = tk.Button(self.root, text="Play", font=("Arial", 14), command=self.start_tree_visualization)
+        play_btn = tk.Button(self.root, text="Play", font=("Arial", 14), command=self.free_play_game)
         play_btn.pack(pady=20)
 
     def add_main_menu_button(self):
@@ -66,18 +66,20 @@ class TreeVisualizerApp:
                 self.ConnectsToEdges[u].append([v,1])
                 self.ConnectsToEdges[v].append([u,-1])
 
-    def start_tree_visualization(self):
-        self.ConnectsTo = []
-        self.ConnectsToEdges = []
-
+    def free_play_game(self):
         try:
             num = int(self.number_entry.get())
-            if not 2 <= num <= 100:
+            if not 2 <= num <= 1000:
                 raise ValueError
         except ValueError:
             tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
             return
         self.tree_size = num
+        self.start_tree_visualization()
+
+    def start_tree_visualization(self):
+        self.ConnectsTo = []
+        self.ConnectsToEdges = []
         while 1:
             tg = TreeGeneratorBranching(self.tree_size)
             edges = tg.generateTree(2,300)
@@ -87,19 +89,23 @@ class TreeVisualizerApp:
 
             solutionCheck = solutionChecker(self.ConnectsToEdges,self.tree_size)
             possible = solutionCheck.checksol()
-            print(possible)
             if possible:
                 break
         
 
-        self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,main_menu = self.main_menu)
+        self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,
+                                         main_menu = self.main_menu,
+                                         next_level = self.next_level
+                                         )
         self.gameDirector.prepareGame()
 
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
 
-
+    def next_level(self):
+        self.tree_size+=2
+        self.start_tree_visualization()
 if __name__ == "__main__":
     root = tk.Tk()
     app = TreeVisualizerApp(root)
