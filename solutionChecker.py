@@ -5,12 +5,11 @@ class solutionChecker:
     def __init__(self,ConnectsToEdge,tree_size):
         
         self.MOD = int(1e9 + 7)
-        self.N = 5005
         self.INF = int(9e18)
         self.POVCon = ConnectsToEdge
         self.res = 0
         self.n = tree_size
-        self.dp = [[0] * (self.N) for _ in range(self.N)]
+        self.dp = [[0] * (tree_size+3) for _ in range(tree_size+3)]
         
     def dfs(self,start, prev, edge, n):
         if prev != start:
@@ -28,12 +27,12 @@ class solutionChecker:
                                 ans *= self.dp[self.POVCon[start][i][0]][j] % self.MOD
                                 ans %= self.MOD
 
-                        if edge in (1, 0):
+                        if edge in (-1, 0):
                             self.dp[start][j + 1] = (self.dp[start][j + 1] + ans) % self.MOD
-                        if edge in (-1, 0) and j > 0:
+                        if edge in (1, 0) and j > 0:
                             self.dp[start][j - 1] = (self.dp[start][j - 1] + ans) % self.MOD
                 else:
-                    if edge in (1, 0):
+                    if edge in (-1, 0):
                         self.dp[start][1] = 1
             else:
                 for j in range(n + 1):

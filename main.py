@@ -86,6 +86,9 @@ class TreeVisualizerApp:
             tg = TreeGeneratorBranching(self.tree_size)
             edges = tg.generateTree(2,300)
             #edges = [((1, 2), '?'), ((2, 3), ')')]
+            #print(self.tree_size)
+            #for edge in edges:
+                #print(edge[0][0],edge[0][1],edge[1])
             print(edges)
             self.convertEdges(edges)
 

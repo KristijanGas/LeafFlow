@@ -99,7 +99,8 @@ class gameDirector:
                 self.definedEdges[(u,v)] = direction
                 self.playerSetEdges[(u,v)] = direction
                 self.square_canvas.add_edge(u, v,direction,color="grey")
-
+        for i in range(1,self.tree_size+1):
+            self.square_canvas._add_number_to_node(i,i)
     def player_edge_assign(self,u,v):
         dirChange = 1
         if u > v:
