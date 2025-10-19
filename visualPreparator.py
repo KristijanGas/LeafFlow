@@ -68,7 +68,7 @@ class visualPreparator:
     def radiusRestriction(self,spacingMultiplier,vertexRadius):
         return vertexRadius+spacingMultiplier*vertexRadius/2.5
     
-    def initPositions(self,spacingMultiplier,vertexRadius):
+    def initPositionsPropagating(self,spacingMultiplier,vertexRadius):
         radiusRestriction = []
 
         bfs = LinkedList()
@@ -148,8 +148,76 @@ class visualPreparator:
                     nodesDrawn+=1
         return self.vertexPositioning
 
+    def calculateSubTreeSizes(self):
+        # Compute subtree sizes for every node and store in self.subTreeSizes
+        # Uses DFS from self.root to populate a dict mapping node -> size (# nodes in its subtree)
+        def __dfs(u, parent):
+            size = 1
+            for v in self.ConnectsTo[u]:
+                if v == parent:
+                    continue
+                size += __dfs(v, u)
+            self.subTreeSizes[u] = size
+            return size
+
+        # initialize dict if missing
+        if not hasattr(self, 'subTreeSizes') or self.subTreeSizes is None:
+            self.subTreeSizes = {}
+        # run DFS from root
+        __dfs(self.root, -1)
+
+    def initPositionsCircling(self,spacingMultiplier,vertexRadius):
+        bfs = LinkedList()
+        bfs.push_back(self.root)
+        circleIndices = LinkedList()
+        circleIndices.push_back(0)
+        indexSize = {}
+
+        for i in range(self.tree_size+1):
+            indexSize[i] = 0
+        indexSize[self.root] = self.tree_size
+        self.subTreeSizes = {}
+        angleRestrictions = {}
+        angleRestrictions[self.root] = {"min":0,"max":2*math.pi}
+        self.subTreeSizes[self.root] = self.tree_size
+
+        self.calculateSubTreeSizes()
+        lastCircleIndex = -1
+        curAngle = 0
+        while bfs.size != 0:
+            curNode = bfs.pop_back()
+            circleIndex = circleIndices.pop_back()
+            self.visited[curNode] = 1
+            parent = -1
+            for adjecent in self.ConnectsTo[curNode]:
+                if self.visited[adjecent] == 0:
+                    bfs.push_front(adjecent)
+                    circleIndices.push_front(circleIndex+1)
+                    indexSize[circleIndex+1] += self.subTreeSizes[adjecent]
+                else:
+                    parent = adjecent
+            minAngle = angleRestrictions[curNode]["min"]
+            maxAngle = angleRestrictions[curNode]["max"]
+            centerAngle = (minAngle+maxAngle)/2
+            newx, newy = self.angleToVector(centerAngle)
+            newx*=vertexRadius*spacingMultiplier*circleIndex
+            newy*=vertexRadius*spacingMultiplier*circleIndex
+            self.vertexPositioning[curNode] = {"x" : newx, "y" : newy, "node" : curNode}
+            totalSubTreeSize = self.subTreeSizes[curNode]-1
+            alreadyAssigned = 0
+            for adjecent in self.ConnectsTo[curNode]:
+                if adjecent == parent:
+                    continue
+                subTreeSize = self.subTreeSizes[adjecent]
+                dAlpha = (maxAngle-minAngle)/totalSubTreeSize
+                angleRestrictions[adjecent] = {"min": minAngle+dAlpha*(alreadyAssigned),"max":minAngle+dAlpha*(alreadyAssigned+subTreeSize)}
+                alreadyAssigned+=subTreeSize
+        return self.vertexPositioning
+
 #example usage:
 #
+
+
 """
 n = 7
 tg = TreeGeneratorBranching(n)
