@@ -209,8 +209,6 @@ class visualPreparator:
         
         return self.vertexPositioning
 
-#example usage:
-#
 
 
 """

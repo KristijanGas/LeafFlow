@@ -2,7 +2,7 @@ import tkinter as tk
 import math
 
 class gameCanvas(tk.Frame):
-    def __init__(self, parent, main_menu_callback, **kwargs):
+    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.main_menu_callback = main_menu_callback
@@ -22,8 +22,11 @@ class gameCanvas(tk.Frame):
         self.node_number_text = {}   # node_id → canvas text item id
         self.node_number_value = {}  # node_id → number to display
         self.start_node = None
-        self.edge_callback = None
+
+        self.edge_callback = player_edge_assign
         self.empty_click_callback = None
+        self.check_result_callback = None
+        self.reset_edges_callback = reset_edges_callback
 
         self.zoom = 1.0
         self.pan_offset = [0.0, 0.0]  # Normalized offset
@@ -31,6 +34,14 @@ class gameCanvas(tk.Frame):
         self.last_drag_pos = None
         self.reset_button = tk.Button(self, text="Reset View", command=self.resetView)
         self.reset_button.place(relx=0.0, rely=0.0, anchor='nw', x=10, y=10)
+        # Reset Edges button (to the left of Back button)
+        self.reset_edges_button = tk.Button(self, text="Restart", command=self._on_reset_edges)
+        self.reset_edges_button.place(relx=1.0, rely=0.0, anchor='ne', x=-10, y=50)
+
+        # Check Result button (to the left of Reset Edges button)
+        self.check_result_button = tk.Button(self, text="Check Result", command=self._on_check_result)
+        self.check_result_button.place(relx=1.0, rely=0.0, anchor='ne', x=-10, y=90)
+
         # Right-click drag-to-pan bindings
         self.canvas.bind("<ButtonPress-3>", self._on_pan_start)
         self.canvas.bind("<B3-Motion>", self._on_pan_move)
@@ -42,6 +53,14 @@ class gameCanvas(tk.Frame):
         self.canvas.bind("<MouseWheel>", self._on_mouse_wheel)  # Windows/macOS
         self.canvas.bind("<Button-4>", self._on_mouse_wheel)    # Linux scroll up
         self.canvas.bind("<Button-5>", self._on_mouse_wheel)    # Linux scroll down
+
+    def _on_check_result(self):
+        if self.check_result_callback:
+            self.check_result_callback()
+
+    def _on_reset_edges(self):
+        if self.reset_edges_callback:
+            self.reset_edges_callback()
 
     def _on_pan_start(self, event):
         self.is_panning = True
@@ -89,9 +108,6 @@ class gameCanvas(tk.Frame):
 
     def on_empty_click(self, callback):
         self.empty_click_callback = callback
-
-    def on_edge_draw(self, callback):
-        self.edge_callback = callback
 
     def _on_resize(self, event):
         self._redraw()
@@ -207,7 +223,7 @@ class gameCanvas(tk.Frame):
 
         released_node = self._get_node_at_position(event.x, event.y)
         if released_node and released_node != self.start_node:
-            self.add_edge(self.start_node, released_node, 1, color="royalblue")
+            #self.add_edge(self.start_node, released_node, 1, color="royalblue")
             if self.edge_callback:
                 self.edge_callback(self.start_node, released_node)
 
@@ -223,7 +239,6 @@ class gameCanvas(tk.Frame):
         for item in items:
             if item in self.node_id_by_item:
                 node_id = self.node_id_by_item[item]
-                # Get the bounding box of the oval
                 bbox = self.canvas.bbox(item)
                 if bbox:
                     cx = (bbox[0] + bbox[2]) / 2
@@ -249,7 +264,6 @@ class gameCanvas(tk.Frame):
         return "break"
     def _add_number_to_node(self, number, node_id):
         """Add or update a number displayed on top of the given node."""
-        node_id = str(node_id)
         #print(self.node_item_by_id)
         if node_id not in self.node_item_by_id:
             return  # Node doesn't exist
@@ -284,7 +298,6 @@ class gameCanvas(tk.Frame):
         self.node_number_text[node_id] = text_id
 
     def _remove_number_from_node(self, node_id):
-        node_id = str(node_id)
         """Remove the number displayed on the given node, if any."""
         # Remove canvas text item
         if node_id in self.node_number_text:
