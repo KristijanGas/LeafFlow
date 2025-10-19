@@ -48,7 +48,6 @@ class visualPreparator:
 
             # consider collision only if projection is in front of origin (t >= 0)
             # and the distance to the line is less than or equal to radius
-            disToHit = self.pointsDistance(cx,cy,originx,originy)
             if t >= 0 and distSq <= (r * r)-0.1:
                 if t < closestHitDist:
                     closestHitDist = t
@@ -70,7 +69,7 @@ class visualPreparator:
     
     def initPositionsPropagating(self,spacingMultiplier,vertexRadius):
         radiusRestriction = []
-
+        self.vertexPositioning.clear()
         bfs = LinkedList()
         bfs.push_back(self.root)
 
@@ -172,13 +171,14 @@ class visualPreparator:
         circleIndices = LinkedList()
         circleIndices.push_back(0)
         self.subTreeSizes = {}
+        self.visited.clear()
+        for i in range(self.tree_size+1):
+            self.visited.append(0)
         angleRestrictions = {}
         angleRestrictions[self.root] = {"min":0,"max":2*math.pi}
         self.subTreeSizes[self.root] = self.tree_size
 
         self.calculateSubTreeSizes()
-        lastCircleIndex = -1
-        curAngle = 0
         while bfs.size != 0:
             curNode = bfs.pop_back()
             circleIndex = circleIndices.pop_back()
@@ -206,6 +206,7 @@ class visualPreparator:
                 dAlpha = (maxAngle-minAngle)/totalSubTreeSize
                 angleRestrictions[adjecent] = {"min": minAngle+dAlpha*(alreadyAssigned),"max":minAngle+dAlpha*(alreadyAssigned+subTreeSize)}
                 alreadyAssigned+=subTreeSize
+        
         return self.vertexPositioning
 
 #example usage:
