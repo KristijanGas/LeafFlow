@@ -171,11 +171,6 @@ class visualPreparator:
         bfs.push_back(self.root)
         circleIndices = LinkedList()
         circleIndices.push_back(0)
-        indexSize = {}
-
-        for i in range(self.tree_size+1):
-            indexSize[i] = 0
-        indexSize[self.root] = self.tree_size
         self.subTreeSizes = {}
         angleRestrictions = {}
         angleRestrictions[self.root] = {"min":0,"max":2*math.pi}
@@ -193,7 +188,6 @@ class visualPreparator:
                 if self.visited[adjecent] == 0:
                     bfs.push_front(adjecent)
                     circleIndices.push_front(circleIndex+1)
-                    indexSize[circleIndex+1] += self.subTreeSizes[adjecent]
                 else:
                     parent = adjecent
             minAngle = angleRestrictions[curNode]["min"]
