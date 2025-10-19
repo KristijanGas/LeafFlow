@@ -28,7 +28,7 @@ class TreeVisualizerApp:
         self.number_entry = tk.Entry(self.root, font=("Arial", 14))
         self.number_entry.pack(pady=10)
 
-        play_btn = tk.Button(self.root, text="Play", font=("Arial", 14), command=self.free_play_game)
+        play_btn = tk.Button(self.root, text="Play", font=("Arial", 14), command=self.input_size)
         play_btn.pack(pady=20)
 
     def add_main_menu_button(self):
@@ -66,7 +66,8 @@ class TreeVisualizerApp:
                 self.ConnectsToEdges[u].append([v,1])
                 self.ConnectsToEdges[v].append([u,-1])
 
-    def free_play_game(self):
+
+    def input_size(self):
         try:
             num = int(self.number_entry.get())
             if not 2 <= num <= 1000:
@@ -75,9 +76,10 @@ class TreeVisualizerApp:
             tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
             return
         self.tree_size = num
-        self.start_tree_visualization()
+        self.free_play_game()
 
-    def start_tree_visualization(self):
+    def free_play_game(self):
+
         self.ConnectsTo = []
         self.ConnectsToEdges = []
         while 1:
@@ -91,6 +93,8 @@ class TreeVisualizerApp:
             possible = solutionCheck.checksol()
             if possible:
                 break
+        self.start_tree_visualization()
+    def start_tree_visualization(self):
         
 
         self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,
@@ -105,7 +109,7 @@ class TreeVisualizerApp:
 
     def next_level(self):
         self.tree_size+=2
-        self.start_tree_visualization()
+        self.free_play_game()
 if __name__ == "__main__":
     root = tk.Tk()
     app = TreeVisualizerApp(root)
