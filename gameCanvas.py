@@ -2,7 +2,7 @@ import tkinter as tk
 import math
 
 class gameCanvas(tk.Frame):
-    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign, **kwargs):
+    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign,check_result, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.main_menu_callback = main_menu_callback
@@ -25,7 +25,7 @@ class gameCanvas(tk.Frame):
 
         self.edge_callback = player_edge_assign
         self.empty_click_callback = None
-        self.check_result_callback = None
+        self.check_result_callback = check_result
         self.reset_edges_callback = reset_edges_callback
 
         self.zoom = 1.0
@@ -41,7 +41,9 @@ class gameCanvas(tk.Frame):
         # Check Result button (to the left of Reset Edges button)
         self.check_result_button = tk.Button(self, text="Check Result", command=self._on_check_result)
         self.check_result_button.place(relx=1.0, rely=0.0, anchor='ne', x=-10, y=90)
-
+        self.attempts = 0
+        self.attempts_label = tk.Label(self, text="Attempts: 0", font=("Arial", 10))
+        self.attempts_label.place(relx=0.0, rely=0.0, anchor='nw', x=10, y=45)  # adjust y as needed
         # Right-click drag-to-pan bindings
         self.canvas.bind("<ButtonPress-3>", self._on_pan_start)
         self.canvas.bind("<B3-Motion>", self._on_pan_move)
@@ -53,6 +55,60 @@ class gameCanvas(tk.Frame):
         self.canvas.bind("<MouseWheel>", self._on_mouse_wheel)  # Windows/macOS
         self.canvas.bind("<Button-4>", self._on_mouse_wheel)    # Linux scroll up
         self.canvas.bind("<Button-5>", self._on_mouse_wheel)    # Linux scroll down
+
+    def solved_correctly(self):
+        """Show a centered popup with success message and action buttons."""
+        popup = tk.Toplevel(self)
+        popup.transient(self)
+        popup.grab_set()
+        popup.title("Level Complete")
+
+        # Define popup size
+        width = 600
+        height = 200
+
+        # Center the popup in the parent window
+        x = self.winfo_rootx() + (self.winfo_width() - width) // 2
+        y = self.winfo_rooty() + (self.winfo_height() - height) // 2
+        popup.geometry(f"{width}x{height}+{x}+{y}")
+
+        # Optional: prevent resizing
+        popup.resizable(False, False)
+
+        # Label
+        label = tk.Label(popup, text="🎉 Tree Solved! 🎉", font=("Arial", 18, "bold"))
+        label.pack(pady=20)
+
+        # Buttons Frame
+        button_frame = tk.Frame(popup)
+        button_frame.pack(pady=10)
+
+        # Buttons
+        tk.Button(button_frame, text="Main Menu", width=12,
+                command=lambda: [popup.destroy(), self.main_menu_callback()]).grid(row=0, column=0, padx=5)
+
+        tk.Button(button_frame, text="Restart", width=12,
+                command=lambda: [popup.destroy(), self.reset_edges_callback() if self.reset_edges_callback else None]).grid(row=0, column=1, padx=5)
+
+        tk.Button(button_frame, text="Next Level", width=12,
+                command=lambda: [popup.destroy(), self.next_level_callback() if self.next_level_callback else None]).grid(row=0, column=2, padx=5)
+
+    def solved_incorrectly(self, node_list):
+        """Show a failure message and color specified nodes red."""
+        self.attempts += 1
+        self.attempts_label.config(text=f"Attempts: {self.attempts}")
+
+        # Display "Tree Failed" at the top
+        self.canvas.create_text(
+            self.canvas.winfo_width() // 2, 20,
+            text="Tree Failed", fill="red",
+            font=("Arial", 16, "bold")
+        )
+
+        # Color the specified nodes red
+        for node_id in node_list:
+            if node_id in self.node_item_by_id:
+                self.canvas.itemconfig(self.node_item_by_id[node_id], fill="red")
 
     def _on_check_result(self):
         if self.check_result_callback:

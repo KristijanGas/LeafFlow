@@ -69,7 +69,8 @@ class gameDirector:
         maxRange = max(range_x,range_y)
         self.square_canvas = gameCanvas(self.root,main_menu_callback=self.main_menu,
                                    reset_edges_callback=self.restartGame,
-                                   player_edge_assign=self.player_edge_assign
+                                   player_edge_assign=self.player_edge_assign,
+                                   check_result=self.check_result
                                    )
         self.square_canvas.pack(fill=tk.BOTH, expand=True)
         
@@ -94,6 +95,7 @@ class gameDirector:
                 if u > v:
                     continue
                 self.definedEdges[(u,v)] = direction
+                self.playerSetEdges[(u,v)] = direction
                 self.square_canvas.add_edge(u, v,direction,color="grey")
 
     def player_edge_assign(self,u,v):
@@ -106,3 +108,46 @@ class gameDirector:
         if self.definedEdges[(u,v)] == 0:
             self.playerSetEdges[(u,v)] = dirChange
             self.square_canvas.add_edge(u,v,dirChange,color="royalblue")
+            
+    def check_result(self):
+        for entry in self.playerSetEdges:
+            if self.playerSetEdges[entry] == 0:
+                return
+        self.correct = 1
+        self.incorrect_sequence = []
+        for u, nbrs in enumerate(self.ConnectsToEdges):
+            if len(nbrs) ==1:
+                self.__dfs(u,-1,0)
+        if self.correct:
+            self.square_canvas.solved_correctly()
+        else:
+            self.square_canvas.solved_incorrectly(self.incorrect_sequence)
+        return self.correct
+
+    def __dfs(self,start,parent,curvalue):
+        entered = 0
+        isInCorrect = 0
+        if curvalue < 0:
+            if self.correct == 1:
+                self.correct = 0
+                isInCorrect = 1
+                self.incorrect_sequence.append(start)
+                return isInCorrect
+        for adjecent in self.ConnectsTo[start]:
+            if adjecent != parent:
+                entered+=1
+                u = start
+                v = adjecent
+                direction = 1
+                if u > v:
+                    u,v = v,u
+                    direction = -1
+                value = self.playerSetEdges[(u,v)]
+                ret = self.__dfs(adjecent,start,curvalue+value*direction)
+                isInCorrect = max(ret,isInCorrect)
+        if entered == 0 and curvalue !=0 and self.correct == 1:
+            self.correct = 0
+            isInCorrect = 1
+        if isInCorrect:
+            self.incorrect_sequence.append(start)
+        return isInCorrect
