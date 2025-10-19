@@ -19,7 +19,8 @@ class gameCanvas(tk.Frame):
 
         self.node_id_by_item = {}
         self.node_item_by_id = {}
-
+        self.node_number_text = {}   # node_id → canvas text item id
+        self.node_number_value = {}  # node_id → number to display
         self.start_node = None
         self.edge_callback = None
         self.empty_click_callback = None
@@ -142,6 +143,9 @@ class gameCanvas(tk.Frame):
         for node_id, (nx, ny, scale) in self.nodes.items():
             x, y = to_pixel(nx, ny)
             self._draw_node(node_id, x, y, scale)
+            # Redraw number if it exists
+            if node_id in self.node_number_value:
+                self._add_number_to_node(self.node_number_value[node_id], node_id)
 
     def _draw_node(self, node_id, x, y, scale):
         size = min(self.canvas.winfo_width(), self.canvas.winfo_height()) * self.zoom
@@ -154,7 +158,8 @@ class gameCanvas(tk.Frame):
         self.canvas.tag_bind(oval, "<Button-1>", lambda e, nid=node_id: self._on_node_press(e, nid))
         self.canvas.tag_bind(oval, "<ButtonRelease-1>", lambda e, nid=node_id: self._on_node_release(nid))
         self.node_id_by_item[oval] = node_id
-        self.node_item_by_id[node_id] = oval
+        self.node_item_by_id[node_id] = int(oval)
+        
 
     def _draw_edge(self, x1, y1, x2, y2, direction, color):
         self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2)
@@ -242,3 +247,50 @@ class gameCanvas(tk.Frame):
             oval = self.node_item_by_id[node_id]
             self.canvas.itemconfig(oval, fill="skyblue")
         return "break"
+    def _add_number_to_node(self, number, node_id):
+        """Add or update a number displayed on top of the given node."""
+        node_id = str(node_id)
+        #print(self.node_item_by_id)
+        if node_id not in self.node_item_by_id:
+            return  # Node doesn't exist
+
+        self.node_number_value[node_id] = number  # Save for future redraws
+
+        # Remove old number (if exists)
+        if node_id in self.node_number_text:
+            self.canvas.delete(self.node_number_text[node_id])
+
+        # Get the node's center position
+        oval_id = self.node_item_by_id[node_id]
+        bbox = self.canvas.bbox(oval_id)
+        if not bbox:
+            return
+
+        cx = (bbox[0] + bbox[2]) / 2
+        cy = (bbox[1] + bbox[3]) / 2
+
+        # Scale font size based on zoom and canvas size
+        canvas_size = min(self.canvas.winfo_width(), self.canvas.winfo_height())
+        font_size = int(14 * self.zoom * (canvas_size / 400)*self.nodes[node_id][2])
+        #font_size = max(6, font_size)  # minimum readable size
+
+        # Create the number text
+        text_id = self.canvas.create_text(
+            cx, cy, text=str(number),
+            fill="black", font=("Arial", font_size, "bold"),
+            state="disabled"  # <- makes the text ignore mouse events
+        )
+
+        self.node_number_text[node_id] = text_id
+
+    def _remove_number_from_node(self, node_id):
+        node_id = str(node_id)
+        """Remove the number displayed on the given node, if any."""
+        # Remove canvas text item
+        if node_id in self.node_number_text:
+            self.canvas.delete(self.node_number_text[node_id])
+            del self.node_number_text[node_id]
+
+        # Remove stored number value
+        if node_id in self.node_number_value:
+            del self.node_number_value[node_id]

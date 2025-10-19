@@ -146,8 +146,10 @@ class TreeVisualizerApp:
                 if u > v:
                     continue
                 square_canvas.add_edge(str(u), str(v),direction,color="grey")
-
-
+        #square_canvas._add_number_to_node(1,1)
+        #square_canvas._add_number_to_node(1,2)
+        #square_canvas._add_number_to_node(2,2)
+        #square_canvas._remove_number_from_node(2)
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
