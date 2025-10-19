@@ -28,7 +28,7 @@ class gameDirector:
     
 
         vp = visualPreparator(self.tree_size, self.tree_root, self.ConnectsTo)
-        positions = vp.initPositionsPropagating(spacingMultiplier=2, vertexRadius=self.node_radius)
+        positions = vp.initPositionsCircling(spacingMultiplier=2, vertexRadius=self.node_radius)
         self.positions = positions
         self.restartGame()
 

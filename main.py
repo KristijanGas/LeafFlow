@@ -2,6 +2,7 @@ import tkinter as tk
 import math
 from gameCanvas import gameCanvas
 from gameDirector import gameDirector
+from solutionChecker import solutionChecker
 from tree_generator import TreeGeneratorBranching, TreeNode
 from centroidfind import findCentroid
 from visualPreparator import visualPreparator
@@ -77,12 +78,20 @@ class TreeVisualizerApp:
             tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
             return
         self.tree_size = num
-        tg = TreeGeneratorBranching(self.tree_size)
-        edges = tg.generateTree(2,300)
-        #edges = [((1, 2), '?'), ((2, 3), ')')]
+        while 1:
+            tg = TreeGeneratorBranching(self.tree_size)
+            edges = tg.generateTree(2,300)
+            #edges = [((1, 2), '?'), ((2, 3), ')')]
+            print(edges)
+            self.convertEdges(edges)
 
-        print(edges)
-        self.convertEdges(edges)
+            solutionCheck = solutionChecker(self.ConnectsToEdges,self.tree_size)
+            possible = solutionCheck.checksol()
+            print(possible)
+            if possible:
+                break
+        
+
         self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,main_menu = self.main_menu)
         self.gameDirector.prepareGame()
 
