@@ -1,0 +1,85 @@
+
+import tkinter as tk
+
+class menuCanvas:
+    def __init__(self, root, load_level_callback, freeplay_callback):
+        self.root = root
+        self.load_level = load_level_callback
+        self.freeplay_callback = freeplay_callback
+        self.current_level = 1
+
+    def main_menu(self):
+        self.clear_window()
+
+        self.root.configure(bg="#e0f2e9")  # Soft forest green theme
+
+        # === TITLE ===
+        title = tk.Label(self.root, text="LeafFlow", font=("Georgia", 32, "bold"),
+                        bg="#e0f2e9", fg="#2e4d2e")
+        title.pack(pady=20)
+
+        # === PLAY NOW BUTTON ===
+        play_btn = tk.Button(self.root, text="Play Now", font=("Helvetica", 16),
+                            bg="#a8d5ba", fg="black", relief=tk.RAISED, bd=3,
+                            command=lambda idx=self.current_level: self.load_level(idx))
+        play_btn.pack(pady=10)
+
+        # === HOW TO PLAY BUTTON ===
+        how_to_play_btn = tk.Button(self.root, text="How to Play", font=("Helvetica", 14),
+                                    bg="#cce3dc", command=self.how_to_play)
+        how_to_play_btn.pack(pady=5)
+
+        # === FREEPLAY ===
+        freeplay_frame = tk.Frame(self.root, bg="#e0f2e9")
+        freeplay_frame.pack(pady=15)
+
+        tk.Label(freeplay_frame, text="Freeplay Size:", bg="#e0f2e9",
+                font=("Helvetica", 12)).pack(side=tk.LEFT, padx=5)
+
+        self.freeplay_input = tk.Entry(freeplay_frame, width=5)
+        self.freeplay_input.pack(side=tk.LEFT, padx=5)
+
+        freeplay_btn = tk.Button(freeplay_frame, text="Freeplay", bg="#bcd4c1",
+                                command=self.freeplay_input_size)
+        freeplay_btn.pack(side=tk.LEFT, padx=5)
+
+        # === LEVEL SELECT GRID ===
+        level_frame = tk.Frame(self.root, bg="#e0f2e9")
+        level_frame.pack(pady=20)
+
+        for i in range(20):
+            btn = tk.Button(level_frame, text=f"Level {i+1}", width=10, height=2,
+                            bg="#d0e6d1", command=lambda idx=i: self.load_level(idx+1))
+            btn.grid(row=i // 10, column=i % 10, padx=5, pady=5)
+
+    def how_to_play(self):
+        self.clear_window()
+
+        back_btn = tk.Button(self.root, text="Back to Main Menu", font=("Arial", 14), command=self.main_menu)
+        back_btn.pack(pady=10)
+
+        #how to play
+        instructions = (
+            "How to Play:"
+        )
+        label = tk.Label(self.root, text=instructions, font=("Arial", 18), justify=tk.LEFT)
+        label.pack(pady=20)
+
+        photo = tk.PhotoImage(file="images/test.png")
+
+        label = tk.Label(self.root, image=photo)
+        label.image = photo  # Keep reference
+        label.pack()
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+    def freeplay_input_size(self):
+        try:
+            num = int(self.freeplay_input.get())
+            if not 2 <= num <= 1000:
+                raise ValueError
+        except ValueError:
+            tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
+            return
+        self.freeplay_callback(num)
+        

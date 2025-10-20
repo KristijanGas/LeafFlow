@@ -1,12 +1,9 @@
 import tkinter as tk
-import math
 from gameCanvas import gameCanvas
+from menuCanvas import menuCanvas
 from gameDirector import gameDirector
 from solutionChecker import solutionChecker
 from tree_generator import TreeGeneratorBranching, TreeNode
-from centroidfind import findCentroid
-from visualPreparator import visualPreparator
-
 WIDTH, HEIGHT = 1280, 720
 CENTER_X, CENTER_Y = WIDTH // 2, HEIGHT // 2
 
@@ -15,33 +12,13 @@ class TreeVisualizerApp:
         self.root = root
         self.root.title("LeafFlow")
         self.root.geometry(f"{WIDTH}x{HEIGHT}")
-        self.main_menu()
         self.ConnectsTo = []
         self.ConnectsToEdges = []
+        self.current_level = 1
+        self.menu = menuCanvas(self.root, self.load_level, self.free_play_game)
+        self.menu.main_menu()
         
 
-    def main_menu(self):
-        self.clear_window()
-        label = tk.Label(self.root, text="Enter a number (2-100):", font=("Arial", 14))
-        label.pack(pady=10)
-
-        self.number_entry = tk.Entry(self.root, font=("Arial", 14))
-        self.number_entry.pack(pady=10)
-
-        play_btn = tk.Button(self.root, text="Play", font=("Arial", 14), command=self.input_size)
-        play_btn.pack(pady=20)
-
-    def add_main_menu_button(self):
-        """
-        Adds a 'Main Menu' button to the top-right corner of the window
-        that calls self.mainmenu() when clicked.
-        """
-        # Create the button
-        button = tk.Button(self.root, text="Main Menu", command=self.main_menu)
-
-        # Use place() to position it in the top-right corner
-        # with some padding from the top and right edges
-        button.place(relx=1.0, rely=0.0, anchor="ne", x=-10, y=10)  # 10px from right and top
 
     def convertEdges(self,edges):
         self.ConnectsTo.clear()
@@ -66,20 +43,16 @@ class TreeVisualizerApp:
                 self.ConnectsToEdges[u].append([v,1])
                 self.ConnectsToEdges[v].append([u,-1])
 
+    def load_level(self, level_number):
+        level_sizes = {1: 7, 2: 15, 3: 31, 4: 63, 5: 127}
+        if level_number in level_sizes:
+            self.tree_size = level_sizes[level_number]
+            self.free_play_game(self.tree_size)
+        else:
+            tk.messagebox.showinfo("Info", "No more levels available.")
 
-    def input_size(self):
-        try:
-            num = int(self.number_entry.get())
-            if not 2 <= num <= 1000:
-                raise ValueError
-        except ValueError:
-            tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
-            return
-        self.tree_size = num
-        self.free_play_game()
-
-    def free_play_game(self):
-
+    def free_play_game(self,tree_size):
+        self.tree_size = tree_size
         self.ConnectsTo = []
         self.ConnectsToEdges = []
         while 1:
@@ -97,11 +70,12 @@ class TreeVisualizerApp:
             if possible:
                 break
         self.start_tree_visualization()
+
     def start_tree_visualization(self):
         
 
         self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,
-                                         main_menu = self.main_menu,
+                                         main_menu = self.menu.main_menu,
                                          next_level = self.next_level
                                          )
         self.gameDirector.prepareGame()
@@ -112,7 +86,8 @@ class TreeVisualizerApp:
 
     def next_level(self):
         self.tree_size+=2
-        self.free_play_game()
+        self.free_play_game(self.tree_size)
+
 if __name__ == "__main__":
     root = tk.Tk()
     app = TreeVisualizerApp(root)
