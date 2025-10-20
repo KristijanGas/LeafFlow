@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 from gameCanvas import gameCanvas
 from menuCanvas import menuCanvas
@@ -44,14 +45,18 @@ class TreeVisualizerApp:
                 self.ConnectsToEdges[v].append([u,-1])
 
     def load_level(self, level_number):
-        level_sizes = {1: 7, 2: 15, 3: 31, 4: 63, 5: 127}
-        if level_number in level_sizes:
-            self.tree_size = level_sizes[level_number]
-            self.free_play_game(self.tree_size)
-        else:
+        path = f"levels/main_levels/{level_number}.json"
+        try:
+            with open(path, 'r') as f:
+                edges = json.load(f)
+            self.tree_size = max(max(u, v) for (u, v), _ in edges)
+            print(edges)
+            self.convertEdges(edges)
+            self.start_tree_visualization()
+        except FileNotFoundError:
             tk.messagebox.showinfo("Info", "No more levels available.")
 
-    def free_play_game(self,tree_size):
+    def free_play_game(self, tree_size):
         self.tree_size = tree_size
         self.ConnectsTo = []
         self.ConnectsToEdges = []
@@ -63,6 +68,7 @@ class TreeVisualizerApp:
             #for edge in edges:
                 #print(edge[0][0],edge[0][1],edge[1])
             print(edges)
+            #print(json.dumps(edges))
             self.convertEdges(edges)
 
             solutionCheck = solutionChecker(self.ConnectsToEdges,self.tree_size)
