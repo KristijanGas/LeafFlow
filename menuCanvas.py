@@ -1,4 +1,5 @@
 
+import json
 import tkinter as tk
 
 class menuCanvas:
@@ -46,10 +47,23 @@ class menuCanvas:
         # === LEVEL SELECT GRID ===
         level_frame = tk.Frame(self.root, bg="#e0f2e9")
         level_frame.pack(pady=20)
-
+        path = "levels/main_levels/progress_track.json"
+        try:
+            with open(path, 'r') as f:
+                self.progress = json.load(f)
+            self.current_level = 1
+            for i in range(40):
+                if self.progress[i] == 1:
+                    self.current_level = i+1
+                else:
+                    break
+        except FileNotFoundError:
+            self.current_level = 1
+        
         for i in range(40):
             btn = tk.Button(level_frame, text=f"Level {i+1}", width=10, height=2,
-                            bg="#e6e3d0", command=lambda idx=i: self.load_level(idx+1))
+                            bg="#e6e3d0" if self.progress[i] != 1 else "#5cc36a",
+                             command=lambda idx=i: self.load_level(idx+1))
             btn.grid(row=i // 10, column=i % 10, padx=5, pady=5)
 
     def how_to_play(self):

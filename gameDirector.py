@@ -2,6 +2,7 @@
 
 
 
+import json
 from centroidfind import findCentroid
 from gameCanvas import gameCanvas
 from visualPreparator import visualPreparator
@@ -9,7 +10,7 @@ import tkinter as tk
 
 class gameDirector:
 
-    def __init__(self,tree_size,ConnectsToEdges,ConnectsTo,root,main_menu,next_level):
+    def __init__(self,tree_size,ConnectsToEdges,ConnectsTo,root,main_menu,next_level,current_level):
         self.tree_size = tree_size
         self.ConnectsToEdges = ConnectsToEdges
         self.ConnectsTo = ConnectsTo
@@ -18,6 +19,7 @@ class gameDirector:
         self.main_menu = main_menu
         self.next_level_callback = next_level
         self.node_radius = 8
+        self.current_level = current_level
 
     def clear_window(self):
         for widget in self.root.winfo_children():
@@ -26,8 +28,6 @@ class gameDirector:
     def prepareGame(self):
         centrFinder = findCentroid()
         self.tree_root = centrFinder.find(self.ConnectsTo)
-    
-
         vp = visualPreparator(self.tree_size, self.tree_root, self.ConnectsTo)
         positions = vp.initPositionsCircling(spacingMultiplier=2, vertexRadius=self.node_radius)
         self.positions = positions
@@ -69,7 +69,7 @@ class gameDirector:
             range_y = 1.0
         maxRange = max(range_x,range_y)
         self.square_canvas = gameCanvas(self.root,main_menu_callback=self.main_menu,
-                                   reset_edges_callback=self.restartGame,
+                                   reset_edges_callback=self.prepareGame,
                                    player_edge_assign=self.player_edge_assign,
                                    check_result=self.check_result,
                                    next_level=self.next_level
@@ -125,6 +125,21 @@ class gameDirector:
             self.square_canvas.solved_correctly()
         else:
             self.square_canvas.solved_incorrectly(self.incorrect_sequence)
+
+        if self.correct:
+            path = "levels/main_levels/progress_track.json"
+            try:
+                with open(path, 'r') as f:
+                    progress = json.load(f)
+            except FileNotFoundError:
+                progress = [0]*40
+            if self.correct:
+                try:
+                    progress[self.current_level-1] = 1
+                    with open(path, 'w') as f:
+                        json.dump(progress, f)
+                except FileNotFoundError:
+                    pass
         return self.correct
 
     def __dfs(self,start,parent,curvalue):

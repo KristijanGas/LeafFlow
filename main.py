@@ -1,6 +1,5 @@
 import json
 import tkinter as tk
-from gameCanvas import gameCanvas
 from menuCanvas import menuCanvas
 from gameDirector import gameDirector
 from solutionChecker import solutionChecker
@@ -15,8 +14,8 @@ class TreeVisualizerApp:
         self.root.geometry(f"{WIDTH}x{HEIGHT}")
         self.ConnectsTo = []
         self.ConnectsToEdges = []
-        self.current_level = 1
         self.menu = menuCanvas(self.root, self.load_level, self.free_play_game)
+        self.current_level = 1
         self.menu.main_menu()
         
 
@@ -52,9 +51,10 @@ class TreeVisualizerApp:
             self.tree_size = max(max(u, v) for (u, v), _ in edges)
             #print(edges)
             self.convertEdges(edges)
+            self.current_level = level_number
             self.start_tree_visualization()
         except FileNotFoundError:
-            tk.messagebox.showinfo("Info", "No more levels available.")
+            tk.messagebox.showinfo("Info", "No more levels available, try freeplay!")
 
     def free_play_game(self, tree_size):
         self.tree_size = tree_size
@@ -82,7 +82,8 @@ class TreeVisualizerApp:
 
         self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,
                                          main_menu = self.menu.main_menu,
-                                         next_level = self.next_level
+                                         next_level = self.next_level,
+                                         current_level = self.current_level
                                          )
         self.gameDirector.prepareGame()
 
@@ -91,8 +92,7 @@ class TreeVisualizerApp:
             widget.destroy()
 
     def next_level(self):
-        self.tree_size+=2
-        self.free_play_game(self.tree_size)
+        self.load_level(self.current_level+1)
 
 if __name__ == "__main__":
     root = tk.Tk()
