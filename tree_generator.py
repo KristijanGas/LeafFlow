@@ -1,6 +1,7 @@
 import random
 from collections import defaultdict
-from centroidfind import findCentroid
+from solutionChecker import solutionChecker
+
 class TreeNode:
     def __init__(self, value):
         self.value = value
@@ -17,7 +18,26 @@ class TreeGeneratorBranching:
     def __randint(self, a, b):
         if(a==b):
             return a
-        return random.randint(a, b)
+        return random.randint(a, b)    
+    def convertEdges(self,edges):
+        self.ConnectsTo = [[] for _ in range(self.n + 1)]
+        self.ConnectsToEdges = [[] for _ in range(self.n + 1)]
+        for i in range(self.n-1):
+            u = edges[i][0][0]
+            v = edges[i][0][1]
+            self.ConnectsTo[u].append(v)
+            self.ConnectsTo[v].append(u)
+            type = edges[i][1]
+            
+            if type == "?":
+                self.ConnectsToEdges[u].append([v,0])
+                self.ConnectsToEdges[v].append([u,0])
+            elif type == ")":
+                self.ConnectsToEdges[u].append([v,-1])
+                self.ConnectsToEdges[v].append([u,1])
+            else:
+                self.ConnectsToEdges[u].append([v,1])
+                self.ConnectsToEdges[v].append([u,-1])
     def generateTree(self,maxbranchlen,fillrate):
         n = self.n
         have = 1
@@ -43,13 +63,25 @@ class TreeGeneratorBranching:
                     Red.append(have + 1)
 
                 have += 1
+        fillCount = int(self.n * (fillrate / 1000))
+        while fillCount > 0:
+            edgeIndex = self.__randint(0, len(Out) - 1)
+            u = Out[edgeIndex][0][0]
+            v = Out[edgeIndex][0][1]
+            if Out[edgeIndex][1] == '?':
+                attempt = Out.copy()
+                if random.randint(0, 1) == 0:
+                    attempt[edgeIndex] = ((u, v), ')')
+                else:
+                    attempt[edgeIndex] = ((u, v), '(')
+                self.convertEdges(attempt)
+                solutionCheck = solutionChecker(self.ConnectsToEdges, self.n)
+                possible = solutionCheck.checksol()
+                if possible:
+                    Out = attempt
+                    fillCount -= 1
+        print(fillCount)
 
-        for i in range(n - 1):
-            u, v = Out[i][0]
-            if Mentions.get(u, 0) > 1 and Mentions.get(v, 0) > 1:
-                dothe = self.__randint(1, 1000)
-                if dothe < fillrate:
-                    Out[i] = (Out[i][0], '(' if dothe % 2 == 0 else ')')
         #print(Out[0][0][0])
         return Out
 
