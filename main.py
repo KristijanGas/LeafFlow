@@ -50,7 +50,7 @@ class TreeVisualizerApp:
             with open(path, 'r') as f:
                 edges = json.load(f)
             self.tree_size = max(max(u, v) for (u, v), _ in edges)
-            print(edges)
+            #print(edges)
             self.convertEdges(edges)
             self.start_tree_visualization()
         except FileNotFoundError:
@@ -62,13 +62,13 @@ class TreeVisualizerApp:
         self.ConnectsToEdges = []
         while 1:
             tg = TreeGeneratorBranching(self.tree_size)
-            edges = tg.generateTree(2,400)
+            edges = tg.generateTree(2,200)
             #edges = [((1, 2), '?'), ((2, 3), ')')]
             #print(self.tree_size)
             #for edge in edges:
                 #print(edge[0][0],edge[0][1],edge[1])
-            print(edges)
-            #print(json.dumps(edges))
+            #print(edges)
+            print(json.dumps(edges))
             self.convertEdges(edges)
 
             solutionCheck = solutionChecker(self.ConnectsToEdges,self.tree_size)

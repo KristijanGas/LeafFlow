@@ -64,6 +64,7 @@ class TreeGeneratorBranching:
 
                 have += 1
         fillCount = int(self.n * (fillrate / 1000))
+        fillCount = min(fillCount, len(Out))
         while fillCount > 0:
             edgeIndex = self.__randint(0, len(Out) - 1)
             u = Out[edgeIndex][0][0]
@@ -80,7 +81,6 @@ class TreeGeneratorBranching:
                 if possible:
                     Out = attempt
                     fillCount -= 1
-        print(fillCount)
 
         #print(Out[0][0][0])
         return Out
