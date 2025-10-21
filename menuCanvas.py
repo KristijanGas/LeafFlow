@@ -47,9 +47,9 @@ class menuCanvas:
         level_frame = tk.Frame(self.root, bg="#e0f2e9")
         level_frame.pack(pady=20)
 
-        for i in range(20):
+        for i in range(40):
             btn = tk.Button(level_frame, text=f"Level {i+1}", width=10, height=2,
-                            bg="#d0e6d1", command=lambda idx=i: self.load_level(idx+1))
+                            bg="#e6e3d0", command=lambda idx=i: self.load_level(idx+1))
             btn.grid(row=i // 10, column=i % 10, padx=5, pady=5)
 
     def how_to_play(self):
