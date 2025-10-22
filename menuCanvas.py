@@ -74,16 +74,38 @@ class menuCanvas:
 
         #how to play
         instructions = (
-            "How to Play:"
+            "How to Play:\n" \
+            "1. Drag from node to node to direct an edge.\n" \
+            "2. Consider each path from leaf to leaf. Edges on that path should all be paired up with each other.\n" \
+            "3. Once all paths are satisfied, click check result and see if you win!\n"
         )
         label = tk.Label(self.root, text=instructions, font=("Arial", 18), justify=tk.LEFT)
         label.pack(pady=20)
 
-        photo = tk.PhotoImage(file="images/test.png")
+        # Desired approximate display size
+        target_width = 300
+        target_height = 300
 
-        label = tk.Label(self.root, image=photo)
-        label.image = photo  # Keep reference
-        label.pack()
+        # Create a container frame for horizontal layout
+        image_frame = tk.Frame(self.root)
+        image_frame.pack(pady=10)
+
+        for i in range(3):
+            path = f"images/yes{i+1}.png"
+            img = tk.PhotoImage(file=path)
+
+            # Calculate subsample factors to fit target size
+            subsample_x = max(1, img.width() // target_width)
+            subsample_y = max(1, img.height() // target_height)
+
+            # Apply subsample to scale down
+            img = img.subsample(subsample_x, subsample_y)
+
+            # Create label and pack left-to-right
+            img_label = tk.Label(image_frame, image=img)
+            img_label.image = img  # Prevent garbage collection
+            img_label.pack(side=tk.LEFT, padx=5)
+
     def clear_window(self):
         for widget in self.root.winfo_children():
             widget.destroy()
