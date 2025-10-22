@@ -10,7 +10,7 @@ import tkinter as tk
 
 class gameDirector:
 
-    def __init__(self,tree_size,ConnectsToEdges,ConnectsTo,root,main_menu,next_level,current_level):
+    def __init__(self,tree_size,ConnectsToEdges,ConnectsTo,root,main_menu,next_level,current_level,isFreeplay=False):
         self.tree_size = tree_size
         self.ConnectsToEdges = ConnectsToEdges
         self.ConnectsTo = ConnectsTo
@@ -20,6 +20,7 @@ class gameDirector:
         self.next_level_callback = next_level
         self.node_radius = 8
         self.current_level = current_level
+        self.isFreeplay = isFreeplay
 
     def clear_window(self):
         for widget in self.root.winfo_children():
@@ -72,7 +73,8 @@ class gameDirector:
                                    reset_edges_callback=self.prepareGame,
                                    player_edge_assign=self.player_edge_assign,
                                    check_result=self.check_result,
-                                   next_level=self.next_level
+                                   next_level=self.next_level,
+                                   current_level=self.current_level
                                    )
         self.square_canvas.pack(fill=tk.BOTH, expand=True)
         
@@ -115,6 +117,7 @@ class gameDirector:
     def check_result(self):
         for entry in self.playerSetEdges:
             if self.playerSetEdges[entry] == 0:
+                self.square_canvas._show_incompleteness(entry[0],entry[1])
                 return
         self.correct = 1
         self.incorrect_sequence = []
@@ -126,7 +129,7 @@ class gameDirector:
         else:
             self.square_canvas.solved_incorrectly(self.incorrect_sequence)
 
-        if self.correct:
+        if self.correct and self.isFreeplay==False:
             path = "levels/main_levels/progress_track.json"
             try:
                 with open(path, 'r') as f:

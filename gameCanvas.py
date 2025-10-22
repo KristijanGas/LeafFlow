@@ -2,12 +2,12 @@ import tkinter as tk
 import math
 
 class gameCanvas(tk.Frame):
-    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign,check_result,next_level, **kwargs):
+    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign,check_result,next_level,current_level, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.main_menu_callback = main_menu_callback
         self.edges = []  # (from_id, to_id, direction, color)
-
+        self.current_level = current_level
         self.canvas = tk.Canvas(self, bg='white')
         self.canvas.pack(fill=tk.BOTH, expand=True)
 
@@ -23,6 +23,7 @@ class gameCanvas(tk.Frame):
         self.node_number_value = {}  # node_id → number to display
         self.start_node = None
 
+
         self.edge_callback = player_edge_assign
         self.next_level = next_level
         self.check_result_callback = check_result
@@ -32,6 +33,10 @@ class gameCanvas(tk.Frame):
         self.pan_offset = [0.0, 0.0]  # Normalized offset
         self.is_panning = False
         self.last_drag_pos = None
+
+        self.level_display = tk.Label(self, text=f"Level: {self.current_level}", font=("Arial", 12))
+        self.level_display.place(relx=0.0, rely=0.0, anchor='nw', x=10, y=80)
+
         self.reset_button = tk.Button(self, text="Reset View", command=self.resetView)
         self.reset_button.place(relx=0.0, rely=0.0, anchor='nw', x=10, y=10)
         # Reset Edges button (to the left of Back button)
@@ -234,7 +239,7 @@ class gameCanvas(tk.Frame):
         
 
     def _draw_edge(self, x1, y1, x2, y2, direction, color):
-        self.canvas.create_line(x1, y1, x2, y2, fill=color, width=2)
+        self.canvas.create_line(x1, y1, x2, y2, fill=color, width=4)
         if direction == 0:
             return
         if direction == -1:
@@ -253,7 +258,7 @@ class gameCanvas(tk.Frame):
         dx /= length
         dy /= length
 
-        size = 8
+        size = 14
         angle = math.radians(30)
 
         sin_a = math.sin(angle)
@@ -265,8 +270,8 @@ class gameCanvas(tk.Frame):
         x2 = x - (dx * cos_a + dy * sin_a) * size
         y2 = y - (-dx * sin_a + dy * cos_a) * size
 
-        self.canvas.create_line(x, y, x1, y1, fill=color, width=2)
-        self.canvas.create_line(x, y, x2, y2, fill=color, width=2)
+        self.canvas.create_line(x, y, x1, y1, fill=color, width=3)
+        self.canvas.create_line(x, y, x2, y2, fill=color, width=3)
 
 
     def _on_canvas_release(self, event):
@@ -359,3 +364,21 @@ class gameCanvas(tk.Frame):
         # Remove stored number value
         if node_id in self.node_number_value:
             del self.node_number_value[node_id]
+    
+    def _show_incompleteness(self,fromID,toID):
+        if toID > fromID:
+            toID,fromID = fromID,toID
+        """Display a message indicating the tree is incomplete."""
+        self.canvas.create_text(
+            self.canvas.winfo_width() // 2, 50,
+            text="Tree Incomplete: Not all edges assigned",
+            fill="orange",
+            font=("Arial", 16, "bold")
+        )
+        print(self.edges)
+        try:
+            edge = self.edges.index((toID,fromID,0,"grey"))
+        except ValueError:
+            edge = self.edges.index((fromID,toID,0,"orange"))
+        self.edges[edge] = (fromID,toID,0,"orange")
+        self._redraw()

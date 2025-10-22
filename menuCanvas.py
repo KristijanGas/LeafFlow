@@ -18,7 +18,18 @@ class menuCanvas:
         title = tk.Label(self.root, text="LeafFlow", font=("Georgia", 32, "bold"),
                         bg="#e0f2e9", fg="#2e4d2e")
         title.pack(pady=20)
-
+        path = "levels/main_levels/progress_track.json"
+        try:
+            with open(path, 'r') as f:
+                self.progress = json.load(f)
+            self.current_level = 1
+            for i in range(40):
+                if self.progress[i] == 1:
+                    self.current_level = i+2
+                else:
+                    break
+        except FileNotFoundError:
+            self.current_level = 1
         # === PLAY NOW BUTTON ===
         play_btn = tk.Button(self.root, text="Play Now", font=("Helvetica", 16),
                             bg="#a8d5ba", fg="black", relief=tk.RAISED, bd=3,

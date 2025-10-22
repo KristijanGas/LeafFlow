@@ -52,7 +52,7 @@ class TreeVisualizerApp:
             #print(edges)
             self.convertEdges(edges)
             self.current_level = level_number
-            self.start_tree_visualization()
+            self.start_tree_visualization(isFreeplay=False)
         except FileNotFoundError:
             tk.messagebox.showinfo("Info", "No more levels available, try freeplay!")
 
@@ -75,15 +75,17 @@ class TreeVisualizerApp:
             possible = solutionCheck.checksol()
             if possible:
                 break
-        self.start_tree_visualization()
+        self.current_level = "freeplay"
+        self.start_tree_visualization(isFreeplay=True)
 
-    def start_tree_visualization(self):
-        
+    def start_tree_visualization(self,isFreeplay=False):
+        nextLevelFunction = self.next_level if not isFreeplay else self.next_level_freeplay
 
         self.gameDirector = gameDirector(self.tree_size,self.ConnectsToEdges,self.ConnectsTo,self.root,
                                          main_menu = self.menu.main_menu,
-                                         next_level = self.next_level,
-                                         current_level = self.current_level
+                                         next_level = nextLevelFunction,
+                                         current_level = self.current_level,
+                                         isFreeplay=isFreeplay
                                          )
         self.gameDirector.prepareGame()
 
@@ -93,6 +95,8 @@ class TreeVisualizerApp:
 
     def next_level(self):
         self.load_level(self.current_level+1)
+    def next_level_freeplay(self):
+        self.free_play_game(self.tree_size+2)
 
 if __name__ == "__main__":
     root = tk.Tk()
