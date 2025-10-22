@@ -117,6 +117,7 @@ class gameDirector:
     def check_result(self):
         for entry in self.playerSetEdges:
             if self.playerSetEdges[entry] == 0:
+                self.square_canvas._show_incompleteness(entry[0],entry[1])
                 return
         self.correct = 1
         self.incorrect_sequence = []

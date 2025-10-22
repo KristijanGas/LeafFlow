@@ -364,3 +364,21 @@ class gameCanvas(tk.Frame):
         # Remove stored number value
         if node_id in self.node_number_value:
             del self.node_number_value[node_id]
+    
+    def _show_incompleteness(self,fromID,toID):
+        if toID > fromID:
+            toID,fromID = fromID,toID
+        """Display a message indicating the tree is incomplete."""
+        self.canvas.create_text(
+            self.canvas.winfo_width() // 2, 50,
+            text="Tree Incomplete: Not all edges assigned",
+            fill="orange",
+            font=("Arial", 16, "bold")
+        )
+        print(self.edges)
+        try:
+            edge = self.edges.index((toID,fromID,0,"grey"))
+        except ValueError:
+            edge = self.edges.index((fromID,toID,0,"orange"))
+        self.edges[edge] = (fromID,toID,0,"orange")
+        self._redraw()
