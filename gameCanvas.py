@@ -245,7 +245,7 @@ class gameCanvas(tk.Frame):
         self.edge_press_callback(from_id, to_id)
 
     def _draw_edge(self, x1, y1, x2, y2, direction, color, from_id, to_id):
-        edge = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=4)
+        edge = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=4.5)
 
         self.canvas.tag_bind(edge, "<Button-1>", lambda e: self._on_edge_press(e, from_id, to_id))
         if direction == 0:
