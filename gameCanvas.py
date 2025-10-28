@@ -2,7 +2,8 @@ import tkinter as tk
 import math
 
 class gameCanvas(tk.Frame):
-    def __init__(self, parent, main_menu_callback,reset_edges_callback,player_edge_assign,check_result,next_level,current_level, **kwargs):
+    def __init__(self, parent, main_menu_callback,reset_edges_callback,
+                 player_edge_assign,check_result,next_level,current_level,player_edge_remove, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.main_menu_callback = main_menu_callback
@@ -28,6 +29,7 @@ class gameCanvas(tk.Frame):
         self.next_level = next_level
         self.check_result_callback = check_result
         self.reset_edges_callback = reset_edges_callback
+        self.edge_press_callback = player_edge_remove
 
         self.zoom = 1.0
         self.pan_offset = [0.0, 0.0]  # Normalized offset
@@ -215,7 +217,7 @@ class gameCanvas(tk.Frame):
             x2, y2, _ = self.nodes[to_id]
             px1, py1 = to_pixel(x1, y1)
             px2, py2 = to_pixel(x2, y2)
-            self._draw_edge(px1, py1, px2, py2, direction, color)
+            self._draw_edge(px1, py1, px2, py2, direction, color, from_id, to_id)
 
         for node_id, (nx, ny, scale) in self.nodes.items():
             x, y = to_pixel(nx, ny)
@@ -236,10 +238,16 @@ class gameCanvas(tk.Frame):
         self.canvas.tag_bind(oval, "<ButtonRelease-1>", lambda e, nid=node_id: self._on_node_release(nid))
         self.node_id_by_item[oval] = node_id
         self.node_item_by_id[node_id] = int(oval)
-        
+    
+    def _on_edge_press(self, event, from_id, to_id):
+        if from_id <  to_id:
+            from_id, to_id = to_id, from_id
+        self.edge_press_callback(from_id, to_id)
 
-    def _draw_edge(self, x1, y1, x2, y2, direction, color):
-        self.canvas.create_line(x1, y1, x2, y2, fill=color, width=4)
+    def _draw_edge(self, x1, y1, x2, y2, direction, color, from_id, to_id):
+        edge = self.canvas.create_line(x1, y1, x2, y2, fill=color, width=4)
+
+        self.canvas.tag_bind(edge, "<Button-1>", lambda e: self._on_edge_press(e, from_id, to_id))
         if direction == 0:
             return
         if direction == -1:

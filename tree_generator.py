@@ -90,6 +90,8 @@ class TreeGeneratorBranching:
 
 class TreeGeneratorExtending:
     def __init__(self, n,fillrate):
+        if n < 3:
+            raise ValueError("n should be bigger than 2")
         self.n = n
         self.fillrate = fillrate
         self.nodes = [TreeNode(i) for i in range(1, n + 1)]

@@ -74,7 +74,8 @@ class gameDirector:
                                    player_edge_assign=self.player_edge_assign,
                                    check_result=self.check_result,
                                    next_level=self.next_level,
-                                   current_level=self.current_level
+                                   current_level=self.current_level,
+                                   player_edge_remove=self.player_edge_remove
                                    )
         self.square_canvas.pack(fill=tk.BOTH, expand=True)
         
@@ -174,3 +175,11 @@ class gameDirector:
         return isInCorrect
     def next_level(self):
         self.next_level_callback()
+    def player_edge_remove(self,u,v):
+        if u > v:
+            u,v = v,u
+        if (u,v) not in self.definedEdges:
+            return
+        if self.definedEdges[(u,v)] == 0:
+            self.playerSetEdges[(u,v)] = 0
+            self.square_canvas.add_edge(u,v,0,color="grey")
