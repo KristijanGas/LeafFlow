@@ -9,10 +9,12 @@ class TreeNode:
 
 #generates edge list of a tree with n nodes
 class TreeGeneratorBranching:
-    def __init__(self, n):
+    def __init__(self, n,maxbranchlen,fillrate):
         if n % 2 !=1:
             raise ValueError("n must be odd")
         self.n = n
+        self.maxbranchlen = maxbranchlen
+        self.fillrate = fillrate
         self.nodes = [TreeNode(i) for i in range(1, n + 1)]
         self.adj_list = defaultdict(list)
     def __randint(self, a, b):
@@ -38,7 +40,7 @@ class TreeGeneratorBranching:
             else:
                 self.ConnectsToEdges[u].append([v,1])
                 self.ConnectsToEdges[v].append([u,-1])
-    def generateTree(self,maxbranchlen,fillrate):
+    def generateTree(self):
         n = self.n
         have = 1
         Out = []
@@ -49,7 +51,7 @@ class TreeGeneratorBranching:
 
         while have != n:
             remain = n - have
-            len_branch = self.__randint(1, min(remain, maxbranchlen) // 2) * 2
+            len_branch = self.__randint(1, min(remain, self.maxbranchlen) // 2) * 2
             size = len(Red)
             u = Red[self.__randint(0, size - 1)]
             for i in range(len_branch):
@@ -63,7 +65,7 @@ class TreeGeneratorBranching:
                     Red.append(have + 1)
 
                 have += 1
-        fillCount = int(self.n * (fillrate / 1000))
+        fillCount = int(self.n * (self.fillrate / 1000))
         fillCount = min(fillCount, len(Out))
         while fillCount > 0:
             edgeIndex = self.__randint(0, len(Out) - 1)
