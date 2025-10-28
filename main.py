@@ -3,7 +3,7 @@ import tkinter as tk
 from menuCanvas import menuCanvas
 from gameDirector import gameDirector
 from solutionChecker import solutionChecker
-from tree_generator import TreeGeneratorBranching, TreeNode
+from tree_generator import TreeGeneratorBranching, TreeGeneratorExtending, TreeNode
 WIDTH, HEIGHT = 1280, 720
 CENTER_X, CENTER_Y = WIDTH // 2, HEIGHT // 2
 
@@ -61,7 +61,7 @@ class TreeVisualizerApp:
         self.ConnectsTo = []
         self.ConnectsToEdges = []
         while 1:
-            tg = TreeGeneratorBranching(self.tree_size, 2, 500)
+            tg = TreeGeneratorExtending(self.tree_size, 500)
             edges = tg.generateTree()
             #edges = [((1, 2), '?'), ((2, 3), ')')]
             #print(self.tree_size)
