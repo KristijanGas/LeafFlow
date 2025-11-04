@@ -6,7 +6,7 @@ from solutionChecker import solutionChecker
 from tree_generator import TreeGeneratorBranching, TreeGeneratorExtending, TreeNode
 WIDTH, HEIGHT = 1280, 720
 CENTER_X, CENTER_Y = WIDTH // 2, HEIGHT // 2
-
+# next step/finish | can it be continued | zadavanje postotka ispunjenosti
 class TreeVisualizerApp:
     def __init__(self, root):
         self.root = root
