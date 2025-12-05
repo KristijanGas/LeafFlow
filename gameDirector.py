@@ -1,7 +1,3 @@
-
-
-
-
 import json
 import copy
 from centroidfind import findCentroid
@@ -23,6 +19,7 @@ class gameDirector:
         self.node_radius = 8
         self.current_level = current_level
         self.isFreeplay = isFreeplay
+        self.doneLegit = True
 
     def clear_window(self):
         for widget in self.root.winfo_children():
@@ -37,6 +34,7 @@ class gameDirector:
         self.restartGame()
 
     def restartGame(self):
+        self.doneLegit = True
         self.definedEdges = {}
         self.playerSetEdges = {}
         self.clear_window()
@@ -137,17 +135,44 @@ class gameDirector:
     def auto_complete_next_step(self):
         currentConnectsToEdges = self.convertPlayerEdges()
         solutionCheckerInstance = solutionChecker.solutionChecker(currentConnectsToEdges,self.tree_size)
+        #print(currentConnectsToEdges)
         checkPossibility = solutionCheckerInstance.checksol()
         if self.check_result(): #already good
-            return
+            self.square_canvas.canvas.create_text(
+                self.square_canvas.canvas.winfo_width() // 2, 20,
+                text="Already Good", fill="green",
+                font=("Arial", 16, "bold")
+            )
+        self.doneLegit = False
         if checkPossibility == 0:
-            print("No solution possible")
+            self.square_canvas.canvas.create_text(
+                self.square_canvas.canvas.winfo_width() // 2, 20,
+                text="There is no solution from this position", fill="orange",
+                font=("Arial", 16, "bold")
+            )
         else:
-            print("Solution possible, auto completing an edge")
+            for u in range(1,self.tree_size+1):
+                for pair in currentConnectsToEdges[u]:
+                    v = pair[0]
+                    direction = pair[1]
+                    if direction == 0:
+                        currentConnectsToEdges[u][currentConnectsToEdges[u].index(pair)][1] = 1
+                        currentConnectsToEdges[v][currentConnectsToEdges[v].index([u,0])][1] = -1
+                        solutionCheckerInstance = solutionChecker.solutionChecker(currentConnectsToEdges,self.tree_size)
+                        if solutionCheckerInstance.checksol():
+                            self.auto_complete_edge(u,v,1)
+                            return
+                        else:
+                            currentConnectsToEdges[u][currentConnectsToEdges[u].index([v,1])][1] = -1
+                            currentConnectsToEdges[v][currentConnectsToEdges[v].index([u,-1])][1] = 1
+                            self.auto_complete_edge(u,v,-1)
+                            return
+            
         
 
-    def auto_complete_edge(self,u,v):
+    def auto_complete_edge(self,u,v,dir):
         dirChange = 1
+        
         if u > v:
             u,v = v,u
             dirChange*=-1
@@ -155,8 +180,8 @@ class gameDirector:
             raise ValueError("Edge not defined")
 
         if self.definedEdges[(u,v)] == 0:
-            self.playerSetEdges[(u,v)] = dirChange
-            self.square_canvas.add_edge(u,v,dirChange,color="green")
+            self.playerSetEdges[(u,v)] = dir
+            self.square_canvas.add_edge(u,v,dir,color="green")
 
     def submit_result(self):
         for entry in self.playerSetEdges:
@@ -191,7 +216,9 @@ class gameDirector:
             progress = [0]*40
         if self.correct:
             try:
-                progress[level-1] = 1
+                if self.doneLegit:
+                    progress[level-1] = 1
+                    
                 with open(path, 'w') as f:
                     json.dump(progress, f)
             except FileNotFoundError:
@@ -226,6 +253,8 @@ class gameDirector:
         return isInCorrect
     def next_level(self):
         self.next_level_callback()
+        self.doneLegit = True
+        
     def player_edge_remove(self,u,v):
         if u > v:
             u,v = v,u
