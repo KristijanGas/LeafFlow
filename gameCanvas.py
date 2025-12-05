@@ -3,7 +3,7 @@ import math
 
 class gameCanvas(tk.Frame):
     def __init__(self, parent, main_menu_callback,reset_edges_callback,
-                 player_edge_assign,check_result,next_level,current_level,player_edge_remove, **kwargs):
+                 player_edge_assign,submit_result,next_level,current_level,player_edge_remove, autocomplete_edge, **kwargs):
         super().__init__(parent, **kwargs)
 
         self.main_menu_callback = main_menu_callback
@@ -24,10 +24,10 @@ class gameCanvas(tk.Frame):
         self.node_number_value = {}  # node_id → number to display
         self.start_node = None
 
-
+        self.autocomplete_edge = autocomplete_edge
         self.edge_callback = player_edge_assign
         self.next_level = next_level
-        self.check_result_callback = check_result
+        self.check_result_callback = submit_result
         self.reset_edges_callback = reset_edges_callback
         self.edge_press_callback = player_edge_remove
 
@@ -35,6 +35,9 @@ class gameCanvas(tk.Frame):
         self.pan_offset = [0.0, 0.0]  # Normalized offset
         self.is_panning = False
         self.last_drag_pos = None
+
+        self.auto_complete_button = tk.Button(self, text="Auto-complete Step", command=self.autocomplete_edge)
+        self.auto_complete_button.place(relx=1.0, rely=1.0, anchor='ne', x=-10, y=-40)
 
         self.level_display = tk.Label(self, text=f"Level: {self.current_level}", font=("Arial", 12))
         self.level_display.place(relx=0.0, rely=0.0, anchor='nw', x=10, y=80)

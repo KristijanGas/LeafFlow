@@ -3,8 +3,10 @@
 
 
 import json
+import copy
 from centroidfind import findCentroid
 from gameCanvas import gameCanvas
+import solutionChecker
 from visualPreparator import visualPreparator
 import tkinter as tk
 
@@ -72,10 +74,11 @@ class gameDirector:
         self.square_canvas = gameCanvas(self.root,main_menu_callback=self.main_menu,
                                    reset_edges_callback=self.prepareGame,
                                    player_edge_assign=self.player_edge_assign,
-                                   check_result=self.check_result,
+                                   submit_result=self.submit_result,
                                    next_level=self.next_level,
                                    current_level=self.current_level,
-                                   player_edge_remove=self.player_edge_remove
+                                   player_edge_remove=self.player_edge_remove,
+                                   autocomplete_edge=self.auto_complete_next_step
                                    )
         self.square_canvas.pack(fill=tk.BOTH, expand=True)
         
@@ -114,37 +117,85 @@ class gameDirector:
         if self.definedEdges[(u,v)] == 0:
             self.playerSetEdges[(u,v)] = dirChange
             self.square_canvas.add_edge(u,v,dirChange,color="royalblue")
-            
-    def check_result(self):
+    
+    def convertPlayerEdges(self):
+        convertedEdges = copy.deepcopy(self.ConnectsToEdges)
+        for j in range(self.tree_size+1):
+            for i in range(len(convertedEdges[j])):
+                v = convertedEdges[j][i][0]
+                u = j
+                dirChange = 1
+                
+                if u > v:
+                    u,v = v,u
+                    dirChange*=-1
+                if self.ConnectsToEdges[j][i][1] == 0 and self.playerSetEdges[(u,v)] != 0:
+                    convertedEdges[j][i][1] = dirChange * self.playerSetEdges[(u,v)]
+
+        return convertedEdges
+
+    def auto_complete_next_step(self):
+        currentConnectsToEdges = self.convertPlayerEdges()
+        solutionCheckerInstance = solutionChecker.solutionChecker(currentConnectsToEdges,self.tree_size)
+        checkPossibility = solutionCheckerInstance.checksol()
+        if self.check_result(): #already good
+            return
+        if checkPossibility == 0:
+            print("No solution possible")
+        else:
+            print("Solution possible, auto completing an edge")
+        
+
+    def auto_complete_edge(self,u,v):
+        dirChange = 1
+        if u > v:
+            u,v = v,u
+            dirChange*=-1
+        if (u,v) not in self.definedEdges:
+            raise ValueError("Edge not defined")
+
+        if self.definedEdges[(u,v)] == 0:
+            self.playerSetEdges[(u,v)] = dirChange
+            self.square_canvas.add_edge(u,v,dirChange,color="green")
+
+    def submit_result(self):
         for entry in self.playerSetEdges:
             if self.playerSetEdges[entry] == 0:
                 self.square_canvas._show_incompleteness(entry[0],entry[1])
                 return
+        correct = self.check_result()
+        if correct:
+            self.square_canvas.solved_correctly()
+            if self.isFreeplay==False:
+                self.updateProgress(self.current_level)
+        else:
+            self.square_canvas.solved_incorrectly(self.incorrect_sequence)
+
+
+    def check_result(self):
         self.correct = 1
         self.incorrect_sequence = []
         for u, nbrs in enumerate(self.ConnectsToEdges):
             if len(nbrs) ==1:
                 self.__dfs(u,-1,0)
-        if self.correct:
-            self.square_canvas.solved_correctly()
-        else:
-            self.square_canvas.solved_incorrectly(self.incorrect_sequence)
 
-        if self.correct and self.isFreeplay==False:
-            path = "levels/main_levels/progress_track.json"
-            try:
-                with open(path, 'r') as f:
-                    progress = json.load(f)
-            except FileNotFoundError:
-                progress = [0]*40
-            if self.correct:
-                try:
-                    progress[self.current_level-1] = 1
-                    with open(path, 'w') as f:
-                        json.dump(progress, f)
-                except FileNotFoundError:
-                    pass
         return self.correct
+    
+    def updateProgress(self, level):
+        
+        path = "levels/main_levels/progress_track.json"
+        try:
+            with open(path, 'r') as f:
+                progress = json.load(f)
+        except FileNotFoundError:
+            progress = [0]*40
+        if self.correct:
+            try:
+                progress[level-1] = 1
+                with open(path, 'w') as f:
+                    json.dump(progress, f)
+            except FileNotFoundError:
+                pass
 
     def __dfs(self,start,parent,curvalue):
         entered = 0
