@@ -6,7 +6,7 @@ from solutionChecker import solutionChecker
 from tree_generator import TreeGeneratorBranching, TreeGeneratorExtending, TreeNode
 WIDTH, HEIGHT = 1280, 720
 CENTER_X, CENTER_Y = WIDTH // 2, HEIGHT // 2
-# next step/finish | can it be continued | zadavanje postotka ispunjenosti
+
 class TreeVisualizerApp:
     def __init__(self, root):
         self.root = root
@@ -56,12 +56,15 @@ class TreeVisualizerApp:
         except FileNotFoundError:
             tk.messagebox.showinfo("Info", "No more levels available, try freeplay!")
 
-    def free_play_game(self, tree_size):
+    def free_play_game(self, tree_size,fill_rate=500, generator_type="branching"):
         self.tree_size = tree_size
         self.ConnectsTo = []
         self.ConnectsToEdges = []
         while 1:
-            tg = TreeGeneratorExtending(self.tree_size, 500)
+            if generator_type == "branching" and self.tree_size%2 == 1:
+                tg = TreeGeneratorBranching(self.tree_size, 4, fill_rate)
+            else:
+                tg = TreeGeneratorExtending(self.tree_size, fill_rate)
             edges = tg.generateTree()
             #edges = [((1, 2), '?'), ((2, 3), ')')]
             #print(self.tree_size)

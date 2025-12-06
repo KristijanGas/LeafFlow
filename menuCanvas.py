@@ -45,15 +45,58 @@ class menuCanvas:
         freeplay_frame = tk.Frame(self.root, bg="#e0f2e9")
         freeplay_frame.pack(pady=15)
 
-        tk.Label(freeplay_frame, text="Freeplay Size:", bg="#e0f2e9",
+        # --- Top row with inputs ---
+        freeplay_top = tk.Frame(freeplay_frame, bg="#e0f2e9")
+        freeplay_top.pack()
+
+        # Freeplay Size
+        tk.Label(freeplay_top, text="Freeplay Size:", bg="#e0f2e9",
                 font=("Helvetica", 12)).pack(side=tk.LEFT, padx=5)
 
-        self.freeplay_input = tk.Entry(freeplay_frame, width=5)
+        self.freeplay_input = tk.Entry(freeplay_top, width=5)
         self.freeplay_input.pack(side=tk.LEFT, padx=5)
 
-        freeplay_btn = tk.Button(freeplay_frame, text="Freeplay", bg="#bcd4c1",
-                                command=self.freeplay_input_size)
-        freeplay_btn.pack(side=tk.LEFT, padx=5)
+        # Fill Percentage Slider
+        tk.Label(freeplay_top, text="Fill %:", bg="#e0f2e9",
+                font=("Helvetica", 12)).pack(side=tk.LEFT, padx=5)
+
+        self.freeplay_fill_percentage = tk.Scale(
+            freeplay_top,
+            from_=0,
+            to=100,
+            orient=tk.HORIZONTAL,
+            length=120,
+            bg="#e0f2e9",
+        )
+        self.freeplay_fill_percentage.set(50)
+        self.freeplay_fill_percentage.pack(side=tk.LEFT, padx=5)
+
+        # Generator selection
+        tk.Label(freeplay_top, text="Generator:", bg="#e0f2e9",
+                font=("Helvetica", 12)).pack(side=tk.LEFT, padx=5)
+
+        self.freeplay_generator = tk.StringVar()
+        self.freeplay_generator.set("branching")
+
+        generator_menu = tk.OptionMenu(
+            freeplay_top,
+            self.freeplay_generator,
+            "branching",
+            "random edges"
+        )
+        generator_menu.config(bg="#bcd4c1")
+        generator_menu.pack(side=tk.LEFT, padx=5)
+
+        # --- Freeplay button below the options ---
+        freeplay_btn = tk.Button(
+            freeplay_frame,
+            text="Freeplay",
+            bg="#bcd4c1",
+            command=self.freeplay_input_size
+        )
+        freeplay_btn.pack(pady=10)
+
+
 
         # === LEVEL SELECT GRID ===
         level_frame = tk.Frame(self.root, bg="#e0f2e9")
@@ -126,7 +169,7 @@ class menuCanvas:
             if not 2 <= num <= 1000:
                 raise ValueError
         except ValueError:
-            tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 100.")
+            tk.messagebox.showerror("Invalid Input", "Please enter a number between 2 and 1000.")
             return
-        self.freeplay_callback(num)
+        self.freeplay_callback(num, fill_rate=self.freeplay_fill_percentage.get()*10, generator_type=self.freeplay_generator.get())
         
