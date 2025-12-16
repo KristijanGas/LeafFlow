@@ -393,3 +393,12 @@ class gameCanvas(tk.Frame):
             edge = self.edges.index((fromID,toID,0,"orange"))
         self.edges[edge] = (fromID,toID,0,"orange")
         self._redraw()
+    def showinfo(self,title,message):
+        popup = tk.Toplevel(self)
+        popup.transient(self)
+        popup.grab_set()
+        popup.title(title)
+        label = tk.Label(popup, text=message)
+        label.pack(padx=20, pady=20)
+        button = tk.Button(popup, text="OK", command=popup.destroy)
+        button.pack(pady=(0, 20))

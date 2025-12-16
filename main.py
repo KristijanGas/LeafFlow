@@ -54,7 +54,7 @@ class TreeVisualizerApp:
             self.current_level = level_number
             self.start_tree_visualization(isFreeplay=False)
         except FileNotFoundError:
-            tk.messagebox.showinfo("Info", "No more levels available, try freeplay!")
+            self.gameDirector.square_canvas.showinfo("Info", "No more levels available, try freeplay!")
 
     def free_play_game(self, tree_size,fill_rate=500, generator_type="branching"):
         self.tree_size = tree_size
